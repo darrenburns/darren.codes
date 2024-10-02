@@ -1,5 +1,5 @@
 +++
-title = "Your Textual app should probably be using fractional units"
+title = "Let's get fractional"
 date = 2024-10-01T22:22:47+01:00
 draft = false
 author = "Darren Burns"

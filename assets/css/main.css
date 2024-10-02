@@ -30,7 +30,7 @@ p {
   line-height: 1.5;
 }
 
-ul {
+ul, ol, li {
   font-family: 'Fira Sans', sans-serif;
 }
 
@@ -298,12 +298,13 @@ background: dodgerblue;
 }
 .highlight pre code[class*='language-python']::before,
 .highlight pre code[class*='language-py']::before {
-content: 'py';
-background: blue;
-color: yellow ;
+  content: 'py';
+  background: blue;
+  color: yellow ;
 }
+.highlight pre code[class*='language-scss']::before,
 .highlight pre code[class*='language-css']::before{
-content: 'css';
+content: 'textual css';
 background: cyan;
 color: black ;
 }
