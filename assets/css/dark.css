@@ -142,7 +142,7 @@ a:hover {
 }
 .highlight pre code[class*='language-python']::before,
 .highlight pre code[class*='language-py']::before {
-  content: 'py';
+  content: 'python';
   background: blue;
   color: yellow ;
 }

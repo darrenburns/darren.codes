@@ -201,6 +201,16 @@ article .title {
   margin-bottom: 1em;
 }
 
+hr.list-item-separator {
+  display: none;
+}
+
+hr.list-item-separator:not(:last-child) {
+  border-top: 2px solid #addebd68;
+  margin: 2em 0;
+  display: block;
+}
+
 
 /* Callout */
 .callout {
@@ -298,7 +308,7 @@ background: dodgerblue;
 }
 .highlight pre code[class*='language-python']::before,
 .highlight pre code[class*='language-py']::before {
-  content: 'py';
+  content: 'python';
   background: blue;
   color: yellow ;
 }

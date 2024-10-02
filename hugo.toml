@@ -15,9 +15,9 @@ paginate=3 # articles per page
 [params]
 	mode="dark" # color-mode → light,dark,toggle or auto
 	useCDN=true # don't use CDNs for fonts and icons, instead serve them locally.
-	subtitle = "Hey, I'm Darren. I'm a software engineer from Scotland who enjoys working on open source projects."
-	mathjax = true # enable MathJax support
-	katex = true # enable KaTeX support
+	subtitle = "Hey, I'm Darren. I'm a software engineer from Scotland who enjoys working on open source projects. I specialise in Python and writing developer tools which run in the terminal. My most well known projects are [Posting](https://posting.sh), a modern HTTP client which runs in the terminal, and [Elia](https://github.com/darrenburns/elia), a TUI for interacting with local and proprietary LLMs. This site is a collection of tips, tutorials, random thoughts, and anything else I feel like writing about!"
+	mathjax = false # enable MathJax support
+	katex = false # enable KaTeX support
 
 # Social Tags
 
@@ -33,7 +33,7 @@ url = "https://x.com/_darrenburns"
 
 [[params.social]]
 name = "Fosstodon"
-icon = "mastodon"
+icon = "message-circle"
 url = "https://fosstodon.org/@darrenburns"
 
 # Main menu Items
