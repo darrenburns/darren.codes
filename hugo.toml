@@ -1,0 +1,59 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-gb'
+title = 'Darren Burns'
+theme = "archie"
+
+copyright = "© Darren Burns"
+pygmentsstyle = "monokai"
+pygmentscodefences = true
+pygmentscodefencesguesssyntax = true
+
+# disqusShortname = "yourDisqusShortname"
+
+paginate=3 # articles per page
+
+[params]
+	mode="dark" # color-mode → light,dark,toggle or auto
+	useCDN=true # don't use CDNs for fonts and icons, instead serve them locally.
+	subtitle = "Hey, I'm Darren. I'm a software engineer from Scotland who enjoys working on open source projects."
+	mathjax = true # enable MathJax support
+	katex = true # enable KaTeX support
+
+# Social Tags
+
+[[params.social]]
+name = "GitHub"
+icon = "github"
+url = "https://github.com/darrenburns/"
+
+[[params.social]]
+name = "X"
+icon = "twitter"
+url = "https://x.com/_darrenburns"
+
+[[params.social]]
+name = "Fosstodon"
+icon = "mastodon"
+url = "https://fosstodon.org/@darrenburns"
+
+# Main menu Items
+
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "Posts"
+url = "/posts"
+weight = 2
+
+# [[menu.main]]
+# name = "Projects"
+# url = "/projects"
+# weight = 3
+
+[[menu.main]]
+name = "Tags"
+url = "/tags"
+weight = 4
