@@ -26,7 +26,7 @@ from textual.binding import Binding
 from textual.reactive import reactive
 from textual.widgets import Static
 
-class Counter(Static):
+class Counter(Static, can_focus=True):
     BINDINGS = [
         # The id is a string used to identify this binding in the keymap.
         # You may wish to namespace them to make managing them easier!
