@@ -1,0 +1,6 @@
+{{ $image := .Page.Resources.GetMatch (.Get "src") }}
+{{ $alt := .Get "alt" }}
+{{ $width := .Get "width" | default "auto" }}
+{{ $height := .Get "height" | default "auto" }}
+
+<img src="{{ $image.RelPermalink }}" alt="{{ $alt }}" width="{{ $width }}" height="{{ $height }}">

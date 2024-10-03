@@ -1,21 +1,24 @@
 +++
-title = "Let's get fractional"
+title = "Let's get fractional - Textual layouts with fr units"
 date = 2024-10-01T22:22:47+01:00
 draft = false
 author = "Darren Burns"
 tags = ['textual', 'python', 'layout']
 +++
 
-Fractional units (`fr`) are a tool in [Textual's CSS system](https://textual.textualize.io/guide/CSS/) which lets you divide up space inside a container in an intuitive way.
+Fractional units (`fr`) are a tool in [Textual's CSS system](https://textual.textualize.io/guide/CSS/) which lets you distribute space between child widgets inside a container in a really intuitive way.
 
-I use them *everywhere* in my Textual apps.
-They provide an intuitive solution to many common layout patterns, and have some less obvious benefits too!
+I use them *everywhere* in my Textual apps, but I get the feeling that they may be a little under-appreciated.
+
+`fr` units make it easy to implement many common layout patterns, and have some less obvious benefits too!
+
+Let's explore how fractional units work in Textual, along with some practical examples!
+
+## Expanding to fill the available space
 
 `width: 1fr;` is one of the most useful snippets of CSS to have in your toolkit.
 This CSS can be thought of as "fill out the remaining available space" in the parent container.
 By "remaining space" I'm referring to the space along an axis that hasn't been assigned a "concrete" value such as `width: 10;`.
-
-Let's explore how fractional units work in Textual, along with some practical examples!
 
 ## Splitting a container in half
 

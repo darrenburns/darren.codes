@@ -5,12 +5,9 @@ draft = true
 author = "Darren Burns"
 +++
 
-Ever tried to copy text from your Textual app only to find it doesn't work?
-That's because terminal emulators have quite limited support for interacting with the clipboard. Fortunately, we have a few options.
+Terminal emulators are in general quite limited when it comes to copying and pasting. Fortunately, when writing Textual apps, we have a few options available to us.
 
 Textual has some built-in support for copy-paste; *but* it's dependent on the terminal your app is running in.
-
-This post looks at `pyperclip`, and how you might integrate it into your Textual app.
 
 ## Textual's built-in support
 
@@ -114,4 +111,3 @@ class MyApp(App[None]):
 ```
 
 Ultimately, the choice is yours and depends on your application and its users!
-
