@@ -3,6 +3,7 @@ title = 'Custom keymaps in Textual'
 date = 2024-10-03T10:42:09+01:00
 draft = false
 author = "Darren Burns"
+tags = ['textual', 'python', 'tutorial']
 +++
 
 [Textual 0.82.0](https://github.com/Textualize/textual/releases/tag/v0.82.0) adds support for *keymaps*, which make it easy to customise keybindings based on config or user preferences.
