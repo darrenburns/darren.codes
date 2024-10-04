@@ -55,6 +55,9 @@ Note that in this example, the parent `Horizontal` widget has a width of 50, whi
 
 This also shows another subtle benefit - we only need to update a single value to `2fr` and the other children will automatically adjust to fill the remaining space. When using percentages, we'd need to update all children and ensure they sum to 100% to get (almost) the same effect.
 
+The `fr` unit guarantees that we'll always use *precisely* 100% of the remaining space, while also handling rounding issues you might encounter when dealing in percentages... because 33.3% + 66.6% != 100%.
+
+
 ## Mixing concrete and fractional units
 
 Fractional units also interact wonderfully with concrete values like `width: 10;`, and this combo has several practical use-cases.
@@ -82,7 +85,7 @@ We can again see this in action in Posting, this time in the URL bar:
 
 ![PostingUrlBar.png](./PostingUrlBar.png)
 
-The method selector dropdown on the left and the send button on the right have fixed widths, while the URL input has `width: 1fr`, allowing it to fill the space between them.
+The method selector dropdown on the left and the "Send" button on the right have fixed widths, while the URL input has `width: 1fr`, allowing it to expand to fill the remaining space between them.
 
 I've found this to be a recurring pattern in my apps: a `Horizontal` container with a few children having fixed or `auto`-calculated widths, with one (or sometimes more) children having `width: 1fr` to fill the remaining space.
 
@@ -101,8 +104,6 @@ Here's the Python code directly taken from Posting which shows this in practice:
 
 ```
 
-## Other benefits
+## Conclusion
 
-The `fr` unit also guarantees that we'll always use precisely 100% of the *remaining* space, while also handling rounding issues you might encounter when dealing in percentages... because 33.3% + 66.6% != 100%.
-
-Finally, `fr` units are comparatively easy to maintain if you're looking to tweak the distribution of space. To change the distribution, you often only need to update the width of a single child, and the remaining `fr` unit children will adapt automatically to fill the width. With `%` units, you'd need to calculate the widths you want and ensure they sum to 100% (and even then, good luck with the inevitable rounding issues!).
+I've found fractional units to be a really powerful and practical tool in Textual, and I hope this post has given you a few ideas for how you can use them in your own apps!
