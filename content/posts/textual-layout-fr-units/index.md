@@ -1,5 +1,5 @@
 +++
-title = "Let's get fractional - Textual layouts with fr units"
+title = "Let's get fractional! Textual layouts with fr units"
 date = 2024-10-01T22:22:47+01:00
 draft = false
 author = "Darren Burns"
