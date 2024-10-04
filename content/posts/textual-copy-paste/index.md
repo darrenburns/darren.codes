@@ -1,19 +1,17 @@
 +++
 title = 'Copying and pasting in Textual'
 date = 2024-10-02T22:36:57+01:00
-draft = true
+draft = false
 author = "Darren Burns"
 +++
 
 Terminal emulators are in general quite limited when it comes to copying and pasting. Fortunately, when writing Textual apps, we have a few options available to us.
 
-Textual has some built-in support for copy-paste; *but* it's dependent on the terminal your app is running in.
-
 ## Textual's built-in support
 
 Textual's `App` class has a method called `copy_to_clipboard(text: str)`. Pass a string into it, and that string will be placed onto the clipboard of the machine your terminal emulator is running on (*if* your emulator supports it).
 
-Unfortunately, if the user of the app is running in MacOS Terminal.app or another unsupported terminal, nothing will happen.
+Unfortunately, if the user of the app is running in MacOS `Terminal.app` or another unsupported terminal, nothing will happen.
 
 ## Consider `pyperclip`
 

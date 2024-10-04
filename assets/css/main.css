@@ -205,6 +205,12 @@ article .title {
   margin-bottom: 1em;
 }
 
+h1.title {
+  font-weight: bold;
+  color: #e5e5e5;
+  font-size: 1.3rem;
+}
+
 hr.list-item-separator {
   display: none;
 }
