@@ -76,7 +76,7 @@ Horizontal {
 }
 ```
 
-Having the blue `Content` widget in the example below fill out like it does is not possible using `%`, as the value we'd need to set it to would change if the parent container was resized.
+Having the blue `Content` widget in the example above fill out like it does is not possible using `%`, as the value we'd need to set it to would change if the parent container was resized.
 
 We can again see this in action in Posting, this time in the URL bar:
 
