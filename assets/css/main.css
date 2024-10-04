@@ -2,7 +2,7 @@
 :root{
 --maincolor: red;
 --bordercl:rebeccapurple;
---callouctcolor:dodgerblue;
+--callouctcolor:rgba(30, 255, 214, 0.219);
 --hovercolor:navy;
 --darkMaincolor: #50fa7b;
 }
@@ -68,13 +68,17 @@ img {
 
 figure {
   box-sizing: border-box;
-  display: inline-block;
-  margin: 0;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
   max-width: 100%;
-}
 
-figure img {
-  max-height: 500px;
+  & figcaption {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 500px;
+  }
 }
 
 @media screen and (min-width: 600px) {

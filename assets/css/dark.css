@@ -19,10 +19,15 @@ hr {
   border-top: 3px dotted blue;
 }
 code {
-  background-color: rgba(173, 216, 230, 0.067);
-  color: rgb(245, 245, 245);
+  background-color: rgba(93, 116, 124, 0.17);
+  color: rgb(142, 201, 174);
   text-decoration: bold;
   padding: 0.1em 0.2em;
+}
+div.callout code {
+  background-color: rgba(54, 238, 118, 0.353);
+  color: rgb(235, 255, 246);
+  font-weight: bold;
 }
 pre {
   background-color: #272822;

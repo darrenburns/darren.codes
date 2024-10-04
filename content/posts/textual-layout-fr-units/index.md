@@ -16,7 +16,24 @@ Let's explore how fractional units work in Textual, along with some practical ex
 
 ## A half-and-half layout
 
-Consider the CSS below, which assigns a width of `1fr` to two widgets inside a `Horizontal` container:
+Let's start with a simple example.
+Given a horizontal container with two child widgets `Left` and `Right`, give each widget half of the available width.
+
+```python
+class Left(Static):
+    pass
+
+class Right(Static):
+    pass
+
+class MyApp(App[None]):
+    def compose(self) -> ComposeResult:
+        with Horizontal():
+            yield Left()
+            yield Right()
+```
+
+ We can assign a width of `1fr` to each of these widgets to achieve the desired layout:
 
 ```scss
 Horizontal {
@@ -30,13 +47,17 @@ Horizontal {
 }
 ```
 
-Both `Left` and `Right` widgets have width `1fr` out of a total of 2 assigned units on the horizontal axis, meaning they'll be given `1/2` of the available space inside the `Horizontal` container (25 cells each in this case). `Horizontal` is a Textual utility container which itself has width `1fr`.
+Both `Left` and `Right` widgets have width `1fr` out of a total of 2 assigned `fr` units on the horizontal axis, meaning they'll each be given `1/2` of the available space inside the container (25 cells each in this case).
+
+{{< callout >}}
+`Horizontal` is a Textual utility container which itself has width `1fr`.
+{{< /callout >}}
 
 ![FrUnitsEqual.svg](./FrUnitsEqual.svg)
 
 In my terminal-based HTTP client, [Posting](https://github.com/darrenburns/posting), I use `height: 1fr` to evenly split the request and response sections inside a `Vertical` container:
 
-![A screenshot of Posting, showing request and response sections split 50/50.](./posting.svg)
+{{< figure src="posting.svg" alt="A screenshot of Posting, showing request and response sections split 50/50." title="The request and response sections are inside a Vertical container, and both have height: 1fr, creating a 50/50 split." >}}
 
 That's all well and good, but it's not really offering anything new over using `%` units, is it?
 
@@ -83,7 +104,7 @@ Having the blue `Content` widget in the example above fill out like it does is n
 
 We can again see this in action in Posting, this time in the URL bar:
 
-![PostingUrlBar.png](./PostingUrlBar.png)
+{{< figure src="PostingUrlBar.png" alt="A screenshot of Posting, showing the URL bar with a 50/50 split between the path and query parameters." title="The 'URLBar' widget in Posting." >}}
 
 The method selector dropdown on the left and the "Send" button on the right have fixed widths, while the URL input has `width: 1fr`, allowing it to expand to fill the remaining space between them.
 
