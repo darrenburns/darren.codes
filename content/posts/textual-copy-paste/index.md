@@ -75,7 +75,7 @@ Let's implement that method now.
 
 ### Implementing the `action_copy_selection` method
 
-The method below implements `action_copy_selection` using `pyperclip`.
+The snippet below implements `action_copy_selection` using `pyperclip`.
 It gets the `selected_text` from the `TextArea`, then tries to import and call `pyperclip`.
 There is a gotcha here: clipboard functionality is not guaranteed.
 On Ubuntu, the clipboard is provided by `xclip` or `xsel`.
