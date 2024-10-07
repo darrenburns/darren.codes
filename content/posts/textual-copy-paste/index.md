@@ -3,27 +3,60 @@ title = 'Copying and pasting in Textual'
 date = 2024-10-02T22:36:57+01:00
 draft = false
 author = "Darren Burns"
+tags = ['textual', 'python']
 +++
 
-Terminal emulators are in general quite limited when it comes to copying and pasting. Fortunately, when writing Textual apps, we have a few options available to us.
+Terminal emulators are in general quite limited when it comes to copying and pasting.
+Fortunately, we have a few options when writing Textual apps which allow us to add support for copy and paste.
+Each has its own trade-offs.
+Let's explore these options and look at how we can integrate them into our apps.
 
-## Textual's built-in support
+## `App.copy_to_clipboard`
 
-Textual's `App` class has a method called `copy_to_clipboard(text: str)`. Pass a string into it, and that string will be placed onto the clipboard of the machine your terminal emulator is running on (*if* your emulator supports it).
+Textual's `App` class has a method called [`copy_to_clipboard`](https://textual.textualize.io/api/app/#textual.app.App.copy_to_clipboard).
+Pass a string into it, and it gets copied to the clipboard on the machine the emulator is running on.
+There is a caveat here: If the terminal doesn't support the required protocol then nothing will happen!
 
-Unfortunately, if the user of the app is running in MacOS `Terminal.app` or another unsupported terminal, nothing will happen.
+### Aside: How does it work?
+
+`App.copy_to_clipboard` uses the [OSC 52 ANSI escape sequence](https://en.wikipedia.org/wiki/ANSI_escape_code#OSC_(Operating_System_Command)_sequences) to tell the terminal emulator to copy text to the system clipboard.
+The terminal emulator doesn't consider the *source* of the text, it justs sends it to the system clipboard.
+Running an application inside tmux over SSH? The text can still be copied to your local system's clipboard!
+
+This sequence has a reasonable degree of support, with MacOS terminal being the notable exception.
+If a terminal supports OSC 52, then `App.copy_to_clipboard` will work.
+
+Here's a table showing OSC 52 support for common terminal emulators:
+
+| Terminal Emulator | OSC 52 Support |
+|-------------------|----------------|
+| iTerm2            | Yes            |
+| Kitty             | Yes            |
+| Alacritty         | Yes            |
+| Windows Terminal  | Yes            |
+| WezTerm           | Yes            |
+| Ghostty           | Yes            |
+| Gnome Terminal    | No             |
+| Konsole           | No (Coming soon) |
+| MacOS Terminal    | No             |
+
 
 ## Consider `pyperclip`
 
-If you need broader clipboard support you can try `pyperclip`. `pyperclip` lets you add support for copying and pasting text to/from the clipboard in a cross-platform manner. It's important to note however, that it'll copy to the clipboard of the machine that the app is running in. This is an important distinction, as it means if your app is running over SSH then it'll copy to the clipboard of the remote host, rather than your local machine!
+If you need broader clipboard support you can try `pyperclip`. `pyperclip` is a cross-platform library for interacting with the clipboard.
+
+It's important to note that `pyperclip` copies to the clipboard of the machine that the *app* is running on.
+This is an important distinction.
+If your app is running over SSH, `pyperclip` copies to the clipboard of the *remote host*!
 
 ## Integrating `pyperclip` with Textual
 
-Let's look at an example of how we might create a read-only `TextArea`, which we can copy some text from. The example assumes you've installed `pyperclip` into your environment.
+Let's look at an example of how we can create a read-only `TextArea`, which we can copy some text from.
+The example assumes you've installed `pyperclip` into your environment.
 
 ### Subclassing `TextArea` and adding a new binding
 
-First, we subclass `TextArea`, and add a binding for which will call the `action_copy_selection` method:
+First, subclass `TextArea`, and add a binding to call the `action_copy_selection` method:
 
 ```python
 class ReadOnlyTextArea(TextArea):
@@ -36,11 +69,19 @@ class ReadOnlyTextArea(TextArea):
         """Copy to the clipboard of the machine the app is running on"""
 ```
 
-This links the `y` and `c` keys on your keyboard to the `action_copy_selection` method. On pressing one of those keys, `action_copy_selection` will be called, so that's where we'll put our code.
+This links the `y` and `c` keys on your keyboard to the `action_copy_selection` method.
+Press one of those keys, and `action_copy_selection` runs.
+Let's implement that method now.
 
 ### Implementing the `action_copy_selection` method
 
-Note that when we use `pyperclip`, we also need some special handling for the case where the user's system has no clipboard management utility (such as Ubuntu by default). If this is the case, you can choose to alert the user however you wish. The inability to copy some text generally wouldn't be considered a *fatal* error, so I like to simply inform the user using a toast rather than crashing their app!
+The method below implements `action_copy_selection` using `pyperclip`.
+It gets the `selected_text` from the `TextArea`, then tries to import and call `pyperclip`.
+There is a gotcha here: clipboard functionality is not guaranteed.
+On Ubuntu, the clipboard is provided by `xclip` or `xsel`.
+If these are unavailable, `pyperclip` will raise an exception which we must handle.
+Lack of clipboard support shouldn't be a fatal error, so graceful handling is important.
+I opted to notify the user about the problem using `self.notify`, which shows a toast popup at the bottom right of the screen.
 
 ```python
     def action_copy_selection(self):
@@ -61,7 +102,7 @@ Note that when we use `pyperclip`, we also need some special handling for the ca
             self.notify(f"Copied {len(text_to_copy)} characters!", title="Copied selection")
 ```
 
-Putting the code above into our `action_copy_selection` method means that whenever we press `y` on our keyboard, that text will be copied and the user will be informed via a toast popup.
+With our action method in place, we can now select text and press `y` to copy it to the clipboard.
 
 ### Using our new widget
 
@@ -86,26 +127,35 @@ If you run the app and select some text using the mouse or by holding shift and 
 
 Switch over to another application and try pasting to confirm that it works.
 
-## Having issues?
+## Which should I use?
 
-If you're having issues with clipboard functionality, consider the following:
+If you're distributing your app, `pyperclip` is likely the better choice due to broader support.
+However, if your app might reasonably be used over SSH, you may consider supporting *both*.
 
-1. Ensure pyperclip is installed correctly in your environment.
-2. On Linux, make sure you have a clipboard utility installed (e.g. `xclip` or `xsel`).
-3. If using SSH, remember that pyperclip will copy to the remote machine's clipboard.
+You could override `App.copy_to_clipboard` with a `pyperclip` version, or make it configurable.
+You could choose to have different keybindings for "copy via terminal" and "copy via host."
 
-## So which should I use?
-
-If you're distributing your app, `pyperclip` is often going to be the better choice, as it has wider support. However, if your app might reasonably be used over SSH, you might consider allowing *both*.
-
-You may wish to override `App.copy_to_clipboard` with a `pyperclip` version, or have it be configurable via a file or environment variable. You could choose to have different keybindings for "copy via terminal" and "copy via host." Or, you may wish to try some smarter detection and choose which one to used based on the user's environment.
+Another option is to try some smarter detection and choose which one to used based on the user's environment.
+For example, if the user is using the default MacOS terminal (which lacks support for copy/paste), you may opt to fall-back to `pyperclip`.
 
 ```python
 from textual.app import App
 
 class MyApp(App[None]):
     def copy_to_clipboard(self, text: str) -> None:
-        """Implement your own custom logic if needed."""
+        """Copy text to the clipboard"""
+        is_apple_terminal = os.environ.get("TERM_PROGRAM", "") != "Apple_Terminal"
+        if is_apple_terminal:
+            self.copy_with_pyperclip(text)
+        else:
+            super().copy_to_clipboard(text)
+
+    def copy_with_pyperclip(self, text: str) -> None:
+        """Copy text to the clipboard using pyperclip"""
+        # don't forget error-handling!
+        import pyperclip
+        pyperclip.copy(text)
 ```
 
-Ultimately, the choice is yours and depends on your application and its users!
+This is of course rather naive, as `TERM_PROGRAM` alone does not provide a complete picture of the user's environment.
+A more robust solution might check the XTerm version, [like Emacs does](https://github.com/emacs-mirror/emacs/blob/f18af6cd5cb7dbbf7420ec2d3efed4e202c4f0dd/lisp/term/xterm.el#L713).
