@@ -123,7 +123,7 @@ if __name__ == "__main__":
     app.run()
 ```
 
-If you run the app and select some text using the mouse or by holding shift and moving the cursor, you'll see a toast popup indicating that the text has been copied.
+If you run the app and select some text using the mouse or by holding shift and moving the cursor, you'll see a toast popup indicating that the text was copied.
 
 Switch over to another application and try pasting to confirm that it works.
 
