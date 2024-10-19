@@ -1,7 +1,7 @@
 +++
 title = 'Introducing Posting 2.0'
-date = 2024-10-18T22:18:01+01:00
-draft = true
+date = 2024-10-19T13:40:01+01:00
+draft = false
 author = "Darren Burns"
 tags = ['posting', 'textual', 'projects']
 +++
