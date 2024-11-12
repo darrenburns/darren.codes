@@ -8,7 +8,6 @@
 }
 html {
   color: #232333;
-  font-family: 'Roboto Mono', monospace;
   font-size: 15px;
   line-height: 1.6em;
 }
@@ -100,6 +99,10 @@ figure h4::before {
 pre code {
   color: inherit;
   padding: 0;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 /* Containers */
