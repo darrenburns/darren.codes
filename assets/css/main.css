@@ -12,7 +12,7 @@ html {
   font-size: 15px;
   line-height: 1.6em;
 }
-body{
+body {
   display: block;
   margin: 8px;
 }
@@ -97,27 +97,8 @@ figure h4::before {
 }
 
 /* Code blocks */
-code {
-  background-color: #f1f1f144;
-  padding: .1em .2em;
-}
-
-pre {
-  background-color: #ececec3b;
-  line-height: 1.4;
-  overflow-x: auto;
-  padding: 1em;
-}
-
-.highlight pre ::selection {
-  background: rgba(255, 255, 255, 0.2);
-  color: inherit;
-}
-
 pre code {
-  background-color: transparent;
   color: inherit;
-  font-size: 100%;
   padding: 0;
 }
 
