@@ -9,7 +9,6 @@
 html {
   color: #232333;
   font-family: 'Roboto Mono', monospace;
-  font-size: 15px;
   line-height: 1.6em;
 }
 body {
@@ -100,6 +99,7 @@ figure h4::before {
 pre code {
   color: inherit;
   padding: 0;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 code {
@@ -269,7 +269,6 @@ svg{
   background: black;
   border-radius: 0 0 0.25rem 0.25rem;
   color: white;
-  font-size: 12px;
   letter-spacing: 0.025rem;
   padding: 0.1rem 0.5rem;
   position: absolute;

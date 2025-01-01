@@ -10,7 +10,7 @@ pygmentscodefencesguesssyntax = true
 
 # disqusShortname = "yourDisqusShortname"
 
-paginate=3 # articles per page
+paginate=8 # articles per page
 
 [params]
 	mode="dark" # color-mode → light,dark,toggle or auto
