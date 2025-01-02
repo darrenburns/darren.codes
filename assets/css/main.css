@@ -7,22 +7,17 @@
 --darkMaincolor: #CCA6F8;
 --darkAccentcolor: #CCA6F8;
 }
-html {
-  color: #232333;
-  font-family: 'Roboto Mono', monospace;
-  line-height: 1.6em;
-}
 body {
   margin: 8px;
+  font-family: 'Fira Sans', sans-serif;
 }
 
 p {
-  font-family: 'Fira Sans', sans-serif;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 ul, ol, li {
-  font-family: 'Fira Sans', sans-serif;
+  line-height: 1.55;
 }
 
 hr {
@@ -79,9 +74,11 @@ figure {
 }
 
 figure h4 {
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin: 0;
   margin-bottom: 1em;
+  font-weight: normal;
+  color: #ffffffb0;
 }
 figure h4::before {
   content: '↳ ';
@@ -92,13 +89,9 @@ figure h4::before {
   overflow-x: auto;
 }
 
-/* Code blocks */
-pre code {
-  color: inherit;
-}
-
 code {
   font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.9rem;
 }
 
 /* Containers */
@@ -118,6 +111,7 @@ header {
   justify-content: space-between;
   margin: 1em 0;
   line-height: 2.5em;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 header .main {
@@ -126,6 +120,7 @@ header .main {
 h1, h2, h3, h4, h5, h6 {
   font-size: 1.2rem;
   margin-top: 2em;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 h1::before { color: var(--maincolor); content: '# '; }
@@ -208,20 +203,7 @@ hr.list-item-separator:not(:last-child) {
   color: #11111B;
   padding: 1em;
   border-radius: 6px;
-}
-
-.callout p {
-  font-family: 'IBM Plex Mono', monospace;
-  margin: 0;
-}
-
-.callout a {
-  border-bottom: 3px solid #fff;
-}
-
-.callout a:hover {
-  background-color: #fff;
-  color: var(--callouctcolor);
+  border: 2px solid #a6e3a2;
 }
 
 .site-description {
