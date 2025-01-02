@@ -21,7 +21,6 @@ paginate=8 # articles per page
     codeFences = true
     codeFencesGuessSyntax = true
 	style = "catppuccin-mocha"
-	noClasses = false
 
 # Social Tags
 
