@@ -85,13 +85,13 @@ figure h4::before {
 }
 
 .highlight > pre {
-  padding: 1rem;
+  padding: 1em;
   overflow-x: auto;
+  border-radius: 6px;
 }
 
 code {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.9rem;
 }
 
 /* Containers */
