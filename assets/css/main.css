@@ -12,16 +12,7 @@ html {
   line-height: 1.6em;
 }
 body {
-  display: block;
   margin: 8px;
-}
-* {
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-}
-
-::selection {
-  background: var(--maincolor);
-  color: #fff;
 }
 
 p {
@@ -99,14 +90,11 @@ figure h4::before {
 pre code {
   color: inherit;
   padding: 0;
-  font-family: 'IBM Plex Mono', monospace;
 }
 
 code {
   font-family: 'IBM Plex Mono', monospace;
 }
-
-
 
 /* Containers */
 .content {

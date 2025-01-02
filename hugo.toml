@@ -4,9 +4,6 @@ title = 'Darren Burns'
 theme = "archie"
 
 copyright = "© Darren Burns"
-pygmentsstyle = "monokai"
-pygmentscodefences = true
-pygmentscodefencesguesssyntax = true
 
 # disqusShortname = "yourDisqusShortname"
 

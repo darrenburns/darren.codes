@@ -19,7 +19,7 @@ Let's explore how fractional units work in Textual, along with some practical ex
 Let's start with a simple example.
 Given a horizontal container with two child widgets `Left` and `Right`, give each widget half of the available width.
 
-```python
+{{< highlight python >}}
 class Left(Static):
     pass
 
@@ -31,11 +31,11 @@ class MyApp(App[None]):
         with Horizontal():
             yield Left()
             yield Right()
-```
+{{< /highlight >}}
 
  We can assign a width of `1fr` to each of these widgets to achieve the desired layout:
 
-```scss
+{{< highlight scss "hl_lines=3 7" >}}
 Horizontal {
     & > Left {
         width: 1fr;
@@ -45,7 +45,7 @@ Horizontal {
         width: 1fr;
     }
 }
-```
+{{< /highlight >}}
 
 Both `Left` and `Right` widgets have width `1fr` out of a total of 2 assigned `fr` units on the horizontal axis, meaning they'll each be given `1/2` of the available space inside the container (25 cells each in this case).
 
@@ -88,7 +88,7 @@ For example, it lets us model a fixed-width "sidebar", and have the rest of the 
 
 The CSS for this might look something like this:
 
-```scss
+{{< highlight scss >}}
 Horizontal {
     & > Sidebar {
         width: 10;
@@ -98,7 +98,7 @@ Horizontal {
         width: 1fr;
     }
 }
-```
+{{< /highlight >}}
 
 Having the blue `Content` widget in the example above fill out like it does is not possible using `%`, as the value we'd need to set it to would change if the parent container was resized.
 
@@ -112,7 +112,7 @@ I've found this to be a recurring pattern in my apps: a `Horizontal` container w
 
 Here's the Python code directly taken from Posting which shows this in practice:
 
-```python
+{{< highlight python >}}
     def compose(self) -> ComposeResult:
         with Horizontal():
             yield MethodSelector(id="method-selector") # fixed width
@@ -122,8 +122,7 @@ Here's the Python code directly taken from Posting which shows this in practice:
             )
             yield Label(id="trace-markers")  # fixed width
             yield SendRequestButton("Send")  # fixed width
-
-```
+{{< /highlight >}}
 
 ## Conclusion
 
