@@ -1,15 +1,20 @@
+body {
+  color: #CED6F4;
+  background-color: #181825;
+}
 
 hr {
-  border-top: 3px dotted blue;
+  border-top: 3px dotted #6C7087;
 }
-code {
-  background-color: rgba(93, 116, 124, 0.17);
-  color: rgb(142, 201, 174);
+p code {
+  color: #FAE2AF;
   padding: 0.1em 0.2em;
 }
 div.callout code {
-  background-color: rgba(54, 238, 118, 0.353);
-  color: rgb(235, 255, 246);
+  background-color: #89D88B;
+}
+blockquote {
+  border-color: #6C7087;
 }
 
 h1,
@@ -21,27 +26,27 @@ h6 {
   color: #ddd;
 }
 h1::before {
-  color: var(--darkMaincolor);
+  color: var(--darkAccentcolor);
   content: "# ";
 }
 h2::before {
-  color: var(--darkMaincolor);
+  color: var(--darkAccentcolor);
   content: "## ";
 }
 h3::before {
-  color: var(--darkMaincolor);
+  color: var(--darkAccentcolor);
   content: "### ";
 }
 h4::before {
-  color: var(--darkMaincolor);
+  color: var(--darkAccentcolor);
   content: "#### ";
 }
 h5::before {
-  color: var(--darkMaincolor);
+  color: var(--darkAccentcolor);
   content: "##### ";
 }
 h6::before {
-  color: var(--darkMaincolor);
+  color: var(--darkAccentcolor);
   content: "###### ";
 }
 

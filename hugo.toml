@@ -16,6 +16,12 @@ paginate=8 # articles per page
 	mathjax = false # enable MathJax support
 	katex = false # enable KaTeX support
 
+[markup]
+  [markup.highlight]
+    codeFences = true
+    codeFencesGuessSyntax = true
+	style = "catppuccin-mocha"
+
 # Social Tags
 
 [[params.social]]

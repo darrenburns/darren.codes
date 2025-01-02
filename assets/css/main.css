@@ -2,9 +2,10 @@
 :root{
 --maincolor: red;
 --bordercl:rebeccapurple;
---callouctcolor:rgba(30, 255, 214, 0.219);
+--callouctcolor:#A6E3A2;
 --hovercolor:navy;
---darkMaincolor: #50fa7b;
+--darkMaincolor: #CCA6F8;
+--darkAccentcolor: #CCA6F8;
 }
 html {
   color: #232333;
@@ -86,10 +87,13 @@ figure h4::before {
   content: '↳ ';
 }
 
+.highlight > pre {
+  padding: 1rem;
+}
+
 /* Code blocks */
 pre code {
   color: inherit;
-  padding: 0;
 }
 
 code {
@@ -191,8 +195,8 @@ hr.list-item-separator {
 }
 
 hr.list-item-separator:not(:last-child) {
-  border-top: 2px solid #addebd68;
-  margin: 2em 0;
+  border-top: 2px solid #313244;
+  margin: 3em 0;
   display: block;
 }
 
@@ -200,8 +204,9 @@ hr.list-item-separator:not(:last-child) {
 /* Callout */
 .callout {
   background-color: var(--callouctcolor);
-  color: #fff;
+  color: #11111B;
   padding: 1em;
+  border-radius: 6px;
 }
 
 .callout p {

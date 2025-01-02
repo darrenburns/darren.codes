@@ -113,15 +113,15 @@ I've found this to be a recurring pattern in my apps: a `Horizontal` container w
 Here's the Python code directly taken from Posting which shows this in practice:
 
 {{< highlight python >}}
-    def compose(self) -> ComposeResult:
-        with Horizontal():
-            yield MethodSelector(id="method-selector") # fixed width
-            yield UrlInput(  # width: 1fr
-                placeholder="Enter a URL...",
-                id="url-input",
-            )
-            yield Label(id="trace-markers")  # fixed width
-            yield SendRequestButton("Send")  # fixed width
+def compose(self) -> ComposeResult:
+    with Horizontal():
+        yield MethodSelector(id="method-selector") # fixed width
+        yield UrlInput(  # width: 1fr
+            placeholder="Enter a URL...",
+            id="url-input",
+        )
+        yield Label(id="trace-markers")  # fixed width
+        yield SendRequestButton("Send")  # fixed width
 {{< /highlight >}}
 
 ## Conclusion
