@@ -2,7 +2,7 @@
 :root{
 --maincolor: red;
 --bordercl:rebeccapurple;
---callouctcolor:#A6E3A2;
+--callouctcolor:#a6e3a2be;
 --hovercolor:navy;
 --darkMaincolor: #CCA6F8;
 --darkAccentcolor: #CCA6F8;
@@ -89,6 +89,7 @@ figure h4::before {
 
 .highlight > pre {
   padding: 1rem;
+  overflow-x: auto;
 }
 
 /* Code blocks */
