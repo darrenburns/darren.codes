@@ -91,6 +91,7 @@ figure h4::before {
 
 code {
   font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.9rem;
   /* Fixes iOS font sizing anomaly */
   /* https://github.com/adityatelange/hugo-PaperMod/issues/828#issuecomment-1171994855 */
   text-size-adjust: 100%;
@@ -121,6 +122,7 @@ header {
 
 header .main {
   font-size: 1.35rem;
+  font-weight: bold;
   text-shadow: 0 0 10px rgba(147, 138, 169, 0.8),
                0 0 20px rgba(147, 138, 169, 0.6),
                0 0 30px rgba(147, 138, 169, 0.4),
@@ -165,8 +167,7 @@ h6::before { color: var(--maincolor); content: '###### '; }
 /* Footer */
 footer {
   display: flex;
-  align-items: center;
-  border-top: 0.4rem dotted var(--bordercl);
+  border-top: 2px solid #313244;
   padding: 2rem 0rem;
   margin-top: 2rem;
 }
@@ -194,14 +195,19 @@ time {
 }
 
 /* Posts */
-article .title {
-  margin-bottom: 1em;
+article .post-title {
+  font-size: 1.3rem;
+  margin-bottom: 0.4em;
 }
 
+.ellipsis {
+  color: #5c5c69;
+}
 h1.title {
   font-weight: bold;
   color: #e5e5e5;
   font-size: 1.3rem;
+  margin-top: 0;
 }
 
 hr.list-item-separator {
@@ -226,8 +232,9 @@ hr.list-item-separator:not(:last-child) {
 }
 
 .site-description {
-display: flex;
-justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5em;
 }
 svg{
   max-height: 15px;

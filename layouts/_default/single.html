@@ -2,7 +2,7 @@
 <main>
 	<article>
 		<div class="title">
-			<h1 class="title">{{ .Title }}</h1>
+			<h1 class="post-title">{{ .Title }}</h1>
 			<div class="meta">
 				{{ if not .Date.IsZero }}
 					Posted on {{ dateFormat ":date_medium" .Date }}
