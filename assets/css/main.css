@@ -1,6 +1,6 @@
 /* Markdown */
 :root{
---maincolor: red;
+--maincolor: #CCA6F8;
 --bordercl:rebeccapurple;
 --callouctcolor:#a6e3a2be;
 --hovercolor:navy;
@@ -75,8 +75,7 @@ figure {
 
 figure h4 {
   font-size: 0.9rem;
-  margin: 0;
-  margin-bottom: 1em;
+  margin: 1em 0;
   font-weight: normal;
   color: #ffffffb0;
 }
@@ -121,7 +120,11 @@ header {
 }
 
 header .main {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
+  text-shadow: 0 0 10px rgba(147, 138, 169, 0.8),
+               0 0 20px rgba(147, 138, 169, 0.6),
+               0 0 30px rgba(147, 138, 169, 0.4),
+               0 0 40px rgba(147, 138, 169, 0.3);
 }
 h1, h2, h3, h4, h5, h6 {
   font-size: 1.2rem;
@@ -129,7 +132,16 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'IBM Plex Mono', monospace;
 }
 
-h1::before { color: var(--maincolor); content: '# '; }
+h1::before { 
+  color: var(--maincolor); 
+  content: '# '; 
+  text-shadow: 0 0 10px rgba(204, 166, 248, 1.0),
+               0 0 20px rgba(204, 166, 248, 0.9),
+               0 0 30px rgba(204, 166, 248, 0.8),
+               0 0 40px rgba(204, 166, 248, 0.7),
+               0 0 50px rgba(204, 166, 248, 0.6),
+               0 0 60px rgba(204, 166, 248, 0.5);
+}
 h2::before { color: var(--maincolor); content: '## '; }
 h3::before { color: var(--maincolor); content: '### '; }
 h4::before { color: var(--maincolor); content: '#### '; }
@@ -210,21 +222,12 @@ hr.list-item-separator:not(:last-child) {
   padding: 1em;
   border-radius: 6px;
   border: 2px solid #a6e3a2;
+  margin: 2em 0 3em 0;
 }
 
 .site-description {
 display: flex;
 justify-content: space-between;
-}
-.tags li::before{
-  content: "🏷 ";
-}
-.tags a{
-  border-bottom: 3px solid var(--maincolor); 
-}
-.tags a:hover{
-  color:white;
-  background-color: var(--hovercolor); 
 }
 svg{
   max-height: 15px;
@@ -233,7 +236,7 @@ svg{
   color: white;
 }
 .draft-label{ 
-    color: var(--bordercl);
+    color: #f9f2f4;
     text-decoration: none;
     padding: 2px 4px;
     border-radius: 4px;
