@@ -65,3 +65,7 @@ weight = 4
 name = "Tags"
 url = "/tags"
 weight = 5
+
+[services.rss]
+limit = 20 # or however many posts you want in the feed
+fullContent = true # this is the key setting to include full articles
