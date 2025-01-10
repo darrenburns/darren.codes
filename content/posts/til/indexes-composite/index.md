@@ -2,6 +2,7 @@
 title = 'Multi-column indexes - order matters!'
 date = 2025-01-05T08:00:00Z
 author = "Darren Burns"
+draft = true
 tags = ["til", "sql", "databases"]
 +++
 
