@@ -33,6 +33,39 @@ blockquote {
   padding-left: 1em;
 }
 
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0;
+  overflow-x: auto;
+  display: block;
+}
+
+th {
+  border-top: 1px solid #313244;
+}
+
+th, td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #313244;
+}
+
+th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: bold;
+  background-color: #1e1e2e;
+}
+
+tr:nth-child(even) {
+  background-color: #1e1e2e;
+}
+
+tr:hover {
+  background-color: #313244;
+}
+
 a {
   border-bottom: 3px solid var(--maincolor);
   color: inherit;
@@ -189,6 +222,8 @@ footer {
 .title h1 {
   margin-bottom: 0;
 }
+
+
 
 time {
   color: grey;
