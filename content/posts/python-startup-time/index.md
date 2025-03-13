@@ -7,7 +7,7 @@ tags = ['python', 'posting', 'performance', 'textual', 'cli']
 +++
 
 I've been working on improving the startup time of Posting recently.
-Posting is a TUI application built with Textual, and written in Python, for managing and sending HTTP requests.
+[Posting](https://github.com/darrenburns/posting) is a TUI application built with [Textual](https://textual.textualize.io/), and written in Python, for managing and sending HTTP requests.
 
 {{< video src="posting-overview.mp4" title="Posting overview" autoplay=true loop=true width="100%" >}}
 
