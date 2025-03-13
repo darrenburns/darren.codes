@@ -1,0 +1,52 @@
+/* Override all heading ::before pseudo-elements */
+h1::before, h2::before, h3::before, h4::before, h5::before, h6::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* Restore the figure h4::before content */
+figure h4::before {
+  content: '↳ ' !important;
+  display: inline !important;
+}
+
+/* Style the prefix span */
+.prefix {
+  color: var(--maincolor);
+}
+
+h1 .prefix {
+  text-shadow: 0 0 10px rgba(204, 166, 248, 1.0),
+               0 0 20px rgba(204, 166, 248, 0.9),
+               0 0 30px rgba(204, 166, 248, 0.8),
+               0 0 40px rgba(204, 166, 248, 0.7),
+               0 0 50px rgba(204, 166, 248, 0.6),
+               0 0 60px rgba(204, 166, 248, 0.5);
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .prefix {
+    color: var(--darkAccentcolor);
+  }
+}
+
+/* Heading anchor styles */
+.heading-anchor {
+  position: relative;
+  scroll-margin-top: 2rem;
+}
+
+.header-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: none;
+  display: inline-block;
+  width: 100%;
+}
+
+.header-link:hover {
+  color: inherit;
+  background-color: transparent;
+  text-decoration: none;
+} 

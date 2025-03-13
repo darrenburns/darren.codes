@@ -112,9 +112,6 @@ figure h4 {
   font-weight: normal;
   color: #ffffffb0;
 }
-figure h4::before {
-  content: '↳ ';
-}
 
 .highlight > pre {
   padding: 1em;
@@ -167,21 +164,28 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'IBM Plex Mono', monospace;
 }
 
-h1::before { 
-  color: var(--maincolor); 
-  content: '# '; 
-  text-shadow: 0 0 10px rgba(204, 166, 248, 1.0),
-               0 0 20px rgba(204, 166, 248, 0.9),
-               0 0 30px rgba(204, 166, 248, 0.8),
-               0 0 40px rgba(204, 166, 248, 0.7),
-               0 0 50px rgba(204, 166, 248, 0.6),
-               0 0 60px rgba(204, 166, 248, 0.5);
+/* The rest of the heading styles are now in custom.css */
+
+/* Remove all the ::before pseudo-elements */
+h1::before, h2::before, h3::before, h4::before, h5::before, h6::before {
+  display: none !important;
+  content: none !important;
 }
-h2::before { color: var(--maincolor); content: '## '; }
-h3::before { color: var(--maincolor); content: '### '; }
-h4::before { color: var(--maincolor); content: '#### '; }
-h5::before { color: var(--maincolor); content: '##### '; }
-h6::before { color: var(--maincolor); content: '###### '; }
+
+figure h4::before {
+  content: '↳ ' !important;
+  display: inline !important;
+}
+
+.heading-anchor {
+  position: relative;
+  scroll-margin-top: 2rem; /* Add space when scrolling to the header */
+}
+
+/* These styles are now in custom.css */
+.header-link, .prefix, h1 .prefix {
+  /* Styles moved to custom.css */
+}
 
 .meta {
   color: #999;
@@ -284,4 +288,13 @@ svg{
     border-radius: 4px;
     margin-left: 6px;
     background-color: #f9f2f4;
+}
+
+.anchor-link {
+  display: none;
+}
+
+.anchor-icon {
+  font-size: 0.8em;
+  vertical-align: middle;
 }

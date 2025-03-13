@@ -25,34 +25,12 @@ h5,
 h6 {
   color: #ddd;
 }
-h1::before {
-  color: var(--darkAccentcolor);
-  content: "# ";
-}
-h2::before {
-  color: var(--darkAccentcolor);
-  content: "## ";
-}
-h3::before {
-  color: var(--darkAccentcolor);
-  content: "### ";
-}
-h4::before {
-  color: var(--darkAccentcolor);
-  content: "#### ";
-}
-h5::before {
-  color: var(--darkAccentcolor);
-  content: "##### ";
-}
-h6::before {
-  color: var(--darkAccentcolor);
-  content: "###### ";
-}
+
+/* The rest of the heading styles are now in custom.css */
 
 .toc {
-  background-color: #272822;
-  color: white;
+  background-color: #181825;
+  color: #ddd;
 }
 
 a {

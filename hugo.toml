@@ -15,6 +15,7 @@ paginate=8 # articles per page
 	subtitle = "Hey, I'm Darren. I'm a software engineer in Edinburgh, UK. I enjoy working on open-source developer tooling, and occasionally writing about it here."
 	mathjax = false # enable MathJax support
 	katex = false # enable KaTeX support
+	customCSS = ["css/custom.css"] # Add custom CSS file
 
 [markup]
   [markup.highlight]

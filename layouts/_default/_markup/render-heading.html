@@ -1,0 +1,15 @@
+{{ $id := .Anchor | safeURL }}
+{{ $level := .Level }}
+{{ $prefix := "" }}
+{{ if eq $level 1 }}{{ $prefix = "# " }}{{ end }}
+{{ if eq $level 2 }}{{ $prefix = "## " }}{{ end }}
+{{ if eq $level 3 }}{{ $prefix = "### " }}{{ end }}
+{{ if eq $level 4 }}{{ $prefix = "#### " }}{{ end }}
+{{ if eq $level 5 }}{{ $prefix = "##### " }}{{ end }}
+{{ if eq $level 6 }}{{ $prefix = "###### " }}{{ end }}
+
+<h{{ $level }} id="{{ $id }}" class="heading-anchor">
+  <a href="#{{ $id }}" class="header-link" title="Copy link to this section" aria-label="Link to section: {{ .Text | plainify }}">
+    <span class="prefix">{{ $prefix }}</span>{{ .Text | safeHTML }}
+  </a>
+</h{{ $level }}> 

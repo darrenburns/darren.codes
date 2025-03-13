@@ -1,0 +1,47 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add click event listeners to all header links
+    document.querySelectorAll('.header-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        // Prevent default behavior
+        e.preventDefault();
+        
+        // Get the URL with the fragment
+        const url = window.location.origin + window.location.pathname + this.getAttribute('href');
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(url).then(function() {
+          // Show a temporary tooltip or notification
+          const tooltip = document.createElement('div');
+          tooltip.textContent = 'Link copied to clipboard!';
+          tooltip.style.position = 'fixed';
+          tooltip.style.top = '20px';
+          tooltip.style.left = '50%';
+          tooltip.style.transform = 'translateX(-50%)';
+          tooltip.style.padding = '8px 16px';
+          tooltip.style.backgroundColor = 'var(--maincolor)';
+          tooltip.style.color = 'white';
+          tooltip.style.borderRadius = '4px';
+          tooltip.style.zIndex = '1000';
+          tooltip.style.opacity = '0.9';
+          
+          document.body.appendChild(tooltip);
+          
+          // Update the URL without reloading the page
+          history.pushState(null, null, link.getAttribute('href'));
+          
+          // Remove the tooltip after 2 seconds
+          setTimeout(function() {
+            tooltip.style.opacity = '0';
+            tooltip.style.transition = 'opacity 0.5s ease-in-out';
+            setTimeout(function() {
+              document.body.removeChild(tooltip);
+            }, 500);
+          }, 2000);
+        }).catch(function(err) {
+          console.error('Could not copy text: ', err);
+        });
+      });
+    });
+  });
+</script> 
