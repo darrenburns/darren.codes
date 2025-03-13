@@ -1,7 +1,7 @@
 +++
 title = "Improving Posting's startup time by over 60%"
 date = 2025-03-13T10:09:06Z
-draft = true
+draft = false
 author = "Darren Burns"
 tags = ['python', 'posting', 'performance', 'textual', 'cli']
 +++
