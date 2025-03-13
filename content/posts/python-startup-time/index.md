@@ -1,5 +1,5 @@
 +++
-title = "Improving Posting's startup time by over 60%"
+title = "Improving Posting's startup time by over 40%"
 date = 2025-03-13T10:09:06Z
 draft = false
 author = "Darren Burns"
