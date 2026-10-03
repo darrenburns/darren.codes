@@ -58,11 +58,16 @@ url = "/projects"
 weight = 3
 
 [[menu.main]]
+name = "Learning"
+url = "/learning"
+weight = 4
+
+[[menu.main]]
 name = "Likes"
 url = "/likes"
-weight = 4
+weight = 5
 
 [[menu.main]]
 name = "Tags"
 url = "/tags"
-weight = 5
+weight = 6

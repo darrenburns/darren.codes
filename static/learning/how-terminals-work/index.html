@@ -1,0 +1,1762 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Anatomy of a Keystroke</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&family=VT323&display=swap">
+<style>
+/* Layout: a long-form field manual. The opener is a working simulator (screen + controls | the layer stack with an input lane and an output lane); each later section pairs short prose with one instrument. */
+:root{
+  --bg:#E7EAEE; --surface:#F6F7F9; --surface-2:#DCE1E7; --kern:#D9DFE7;
+  --ink:#121820; --muted:#556170; --line:#C2CAD4;
+  --in:#B05A00; --in-soft:rgba(176,90,0,.13);
+  --out:#1C62A6; --out-soft:rgba(28,98,166,.13);
+  --sig:#B3241C; --sig-soft:rgba(179,36,28,.12);
+  --scr-bg:#0C1016; --scr-bar:#161C25; --scr-fg:#D3DAE3; --scr-dim:#7A8697; --scr-cur:#F0A030;
+  --display:"VT323","JetBrains Mono",ui-monospace,monospace;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1116; --surface:#151A21; --surface-2:#1D232C; --kern:#121821;
+    --ink:#E1E6EC; --muted:#8D98A6; --line:#2B333E;
+    --in:#F0A030; --in-soft:rgba(240,160,48,.15);
+    --out:#5EA9EE; --out-soft:rgba(94,169,238,.15);
+    --sig:#F2675C; --sig-soft:rgba(242,103,92,.15);
+    --scr-bg:#07090D; --scr-bar:#11161D;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1116; --surface:#151A21; --surface-2:#1D232C; --kern:#121821;
+  --ink:#E1E6EC; --muted:#8D98A6; --line:#2B333E;
+  --in:#F0A030; --in-soft:rgba(240,160,48,.15);
+  --out:#5EA9EE; --out-soft:rgba(94,169,238,.15);
+  --sig:#F2675C; --sig-soft:rgba(242,103,92,.15);
+  --scr-bg:#07090D; --scr-bar:#11161D;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+.sec{scroll-margin-top:24px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-inline:20px;-webkit-font-smoothing:antialiased}
+main{max-width:1240px;margin:0 auto;padding-block:48px 96px}
+a{color:var(--out)}
+p{max-width:68ch;margin:0}
+code,.m{font-family:var(--mono);font-size:.86em}
+p code{background:var(--surface-2);padding:1px 5px;border-radius:4px}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font:400 clamp(64px,11vw,140px)/.82 var(--display);letter-spacing:-.01em}
+h2{font:400 clamp(42px,5.4vw,64px)/.9 var(--display)}
+h3{font:600 15px/1.3 var(--body)}
+.eyebrow{font:500 11.5px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.blk{display:inline-block;width:.5em;height:.78em;background:var(--in);margin-left:.08em;vertical-align:-.02em;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.hero{display:grid;gap:18px}
+.lede{font-size:18px;line-height:1.55;max-width:62ch;color:var(--ink)}
+.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:8px;margin-top:2px}
+.map a{display:grid;gap:3px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);text-decoration:none;font-size:13.5px;line-height:1.4}
+.map a:hover{border-color:var(--out)}
+.map b{font-weight:600;font-size:14px}
+.map b::after{content:" ↓";color:var(--out)}
+.map span{color:var(--muted)}
+.lede em{font-style:normal;color:var(--in);font-weight:500}
+.btn,.key{font:500 12.5px/1 var(--mono);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:7px 10px;cursor:pointer;white-space:nowrap}
+.key{border-bottom-width:3px;padding:7px 9px 6px}
+.btn:hover,.key:hover{border-color:var(--muted)}
+.key:active{transform:translateY(1px);border-bottom-width:2px}
+button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:2px solid var(--out);outline-offset:2px}
+.btn[disabled]{opacity:.4;cursor:default}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;color:var(--muted);font:500 12px/1 var(--mono);padding:7px 10px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.lbl{font:500 11px/1.2 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font:12px var(--mono);color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:0}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);grid-template-areas:"term stack" "ctrl stack" "log stack";grid-template-rows:auto auto 1fr;gap:20px 28px;margin-top:36px;align-items:start}
+@media (max-width:920px){.sim{grid-template-columns:minmax(0,1fr);grid-template-areas:"term" "ctrl" "stack" "log"}}
+.a-term{grid-area:term;min-width:0}.a-ctrl{grid-area:ctrl;min-width:0}.a-stack{grid-area:stack;min-width:0}.a-log{grid-area:log;min-width:0}
+.win{background:var(--scr-bg);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative;transition:border-color .2s}
+.win.focused{border-color:var(--in)}
+.win.bell{animation:bell .25s}
+@keyframes bell{0%{background:#3a2a10}100%{background:var(--scr-bg)}}
+.winbar{display:flex;justify-content:space-between;gap:12px;padding:8px 14px;background:var(--scr-bar);font:12px/1.2 var(--mono);color:var(--scr-dim)}
+.winbar b{color:var(--scr-fg);font-weight:500}
+.screen{display:block;margin:0;padding:12px 14px;font-family:var(--mono);line-height:1.3;color:var(--scr-fg);white-space:pre;outline:none;cursor:text;overflow:hidden}
+.screen .cur{background:transparent!important;outline:1px solid var(--scr-cur);outline-offset:-1px}
+.win.focused .screen .cur{background:var(--scr-cur)!important;color:var(--scr-bg)!important;outline:0;animation:blink 1.1s steps(1) infinite}
+.tip{position:absolute;right:12px;bottom:10px;font:12px var(--mono);color:var(--scr-bg);background:var(--scr-cur);padding:4px 8px;border-radius:4px;pointer-events:none}
+.win.focused .tip{display:none}
+.ctrl{display:grid;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row .lbl{margin-right:4px}
+.chip{font:500 12px/1 var(--mono);padding:6px 9px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+.chip.off{background:transparent;color:var(--muted);border-color:var(--line);border-style:dashed}
+.chip .fld{opacity:.6;font-size:10.5px;margin-left:4px}
+.hint{border-left:3px solid var(--in);background:var(--in-soft);padding:9px 12px;font-size:14px;border-radius:0 6px 6px 0}
+.hint[hidden]{display:none}
+.fgproc{font:12.5px var(--mono);color:var(--muted)}
+.fgproc b{color:var(--ink);font-weight:500}
+.log{font:12px/1.5 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;height:300px;overflow:auto;padding:10px 12px}
+.ln{display:grid;grid-template-columns:88px minmax(0,1fr);gap:10px}
+.ln span:last-child{overflow-wrap:anywhere}
+.tg{color:var(--in)}.tg.out{color:var(--out)}.tg.sig{color:var(--sig)}
+.sep{color:var(--muted);border-top:1px dashed var(--line);margin-top:6px;padding-top:5px}
+.sep:first-child{border:0;margin:0;padding:0}
+
+/* layer stack */
+.stack{position:relative}
+.lanehead,.lrow{display:grid;grid-template-columns:52px minmax(0,1fr) 52px}
+.lanehead{font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-bottom:4px}
+.lanehead span:first-child{color:var(--in)}.lanehead span:last-child{color:var(--out)}
+.lane{position:relative}
+.lane::before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:2px dotted var(--in);transform:translateX(-1px);opacity:.7}
+.lane.lo::before{border-color:var(--out)}
+.lane.first::before{top:50%}.lane.last::before{bottom:50%}
+.lane.none::before{display:none}
+.lane.li:not(.last)::after{content:"";position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);border:5px solid transparent;border-top:6px solid var(--in);border-bottom:0}
+.lane.lo:not(.first):not(.none)::after{content:"";position:absolute;left:50%;top:-4px;transform:translateX(-50%);border:5px solid transparent;border-bottom:6px solid var(--out);border-top:0}
+.card{margin-block:5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px 10px;display:grid;gap:3px;min-width:0}
+.card.k{background:var(--kern)}
+.ct{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.nm{font-weight:600;font-size:14.5px}
+.band{font:500 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.sub{font-size:12.5px;line-height:1.4;color:var(--muted)}
+.more{font-size:12px;color:var(--muted)}
+.more a{color:var(--out);text-decoration:none;border-bottom:1px solid var(--out-soft)}
+.more a:hover{border-bottom-color:var(--out)}
+.now{border-top:1px dashed var(--line);padding-top:4px;margin-top:2px;font:12px/1.4 var(--mono);color:var(--ink);overflow-wrap:anywhere;min-height:1.4em}
+.hit-in{animation:hitIn .8s ease-out}.hit-out{animation:hitOut .8s ease-out}.hit-sig{animation:hitSig .8s ease-out}
+@keyframes hitIn{0%{outline:2px solid var(--in);outline-offset:1px;background:var(--in-soft)}100%{outline:2px solid transparent;outline-offset:6px}}
+@keyframes hitOut{0%{outline:2px solid var(--out);outline-offset:1px;background:var(--out-soft)}100%{outline:2px solid transparent;outline-offset:6px}}
+@keyframes hitSig{0%{outline:2px solid var(--sig);outline-offset:1px;background:var(--sig-soft)}100%{outline:2px solid transparent;outline-offset:6px}}
+.pkt{position:absolute;left:0;top:0;translate:-50% -50%;z-index:5;font:600 10.5px/1 var(--mono);padding:4px 6px;border-radius:4px;background:var(--in);color:var(--bg);white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none}
+.pkt.out{background:var(--out)}.pkt.sig{background:var(--sig)}
+
+/* sections */
+.sec{margin-top:120px;display:grid;gap:22px}
+.sec>header{display:grid;gap:12px;max-width:72ch}
+.prose{display:grid;gap:14px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px;min-width:0}
+.capture{border:1.5px dashed var(--line);border-radius:8px;padding:22px 14px;text-align:center;font:14px var(--mono);color:var(--muted);cursor:pointer;outline:none}
+.capture:focus{border-color:var(--in);color:var(--ink);background:var(--in-soft)}
+.combo{font:400 34px/1 var(--display);color:var(--ink)}
+.bytes{display:flex;flex-wrap:wrap;gap:4px}
+.by{display:grid;place-items:center;min-width:38px;padding:5px 6px 4px;border:1px solid var(--line);border-radius:5px;background:var(--bg)}
+.by .hx{font:600 14px/1.1 var(--mono)}
+.by .cn{font:10.5px/1.2 var(--mono);color:var(--muted)}
+.by.esc{border-color:var(--in)}
+.kv{display:grid;grid-template-columns:120px minmax(0,1fr);gap:8px 14px;align-items:start}
+.kv>.lbl{padding-top:9px}
+.escd{font:12.5px var(--mono);color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.coll{font-size:14px}
+.coll b{color:var(--sig);font-weight:600}
+.bits{display:grid;gap:4px;font:13px var(--mono)}
+.bitrow{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
+.bitrow .bl{width:150px;color:var(--muted);font-size:12px}
+.bit{width:22px;height:24px;display:grid;place-items:center;border:1px solid var(--line);border-radius:3px;background:var(--bg)}
+.bit.x{border-color:var(--sig);color:var(--sig);text-decoration:line-through}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+pre.code{margin:0;background:var(--scr-bg);color:var(--scr-fg);border-radius:10px;padding:16px 18px;font:13px/1.55 var(--mono);overflow-x:auto;border:1px solid var(--line)}
+pre.code .c{color:var(--scr-dim)}
+pre.code .k{color:#F0A030}
+pre.code .f{color:#79B8FF}
+table{border-collapse:collapse;width:100%;font-size:14px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+td.fl{font:600 13px var(--mono);white-space:nowrap}
+td.fl small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+td .btn{font-size:11.5px;padding:6px 8px}
+.callout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.callout .tagk{font:400 28px/1 var(--display);color:var(--in)}
+
+/* VT stepper */
+.vtgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:980px){.vtgrid{grid-template-columns:minmax(0,1fr)}}
+.svgwrap{overflow-x:auto}
+.svgwrap svg{display:block;min-width:560px;width:100%;height:auto}
+.node rect{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.node text{font:600 12px var(--mono);fill:var(--ink)}
+.node text.s{font:400 10px var(--mono);fill:var(--muted)}
+.node.on rect{fill:var(--out-soft);stroke:var(--out);stroke-width:2.5}
+.edge{stroke:var(--muted);stroke-width:1.3;fill:none;marker-end:url(#ah);opacity:.7}
+.edge.on{stroke:var(--out);stroke-width:2.6;marker-end:url(#ah2);opacity:1}
+.arh{fill:var(--muted)}.arh2{fill:var(--out)}
+.elbl{font:10.5px var(--mono);fill:var(--muted)}
+.inrow{display:flex;gap:8px;flex-wrap:wrap}
+.inrow input{flex:1 1 260px;min-width:0;font:13px var(--mono);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.tape{display:flex;gap:3px;overflow-x:auto;padding-bottom:6px}
+.tb{flex:0 0 auto;min-width:34px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:4px 4px 3px;background:var(--bg);cursor:pointer}
+.tb .hx{font:600 12px/1.1 var(--mono)}
+.tb .cn{font:10px/1.2 var(--mono);color:var(--muted)}
+.tb.done{opacity:.5}
+.tb.cur{border-color:var(--out);background:var(--out-soft);opacity:1}
+.stepinfo{display:grid;gap:6px;font-size:14px;min-height:96px}
+.stepinfo .act{font:600 13px var(--mono);color:var(--out)}
+.bufs{font:12px var(--mono);color:var(--muted)}
+.bufs b{color:var(--ink);font-weight:500}
+.mini{background:var(--scr-bg);border-radius:8px;padding:10px 12px;border:1px solid var(--line);overflow-x:auto}
+.mini pre{margin:0;font:13px/1.3 var(--mono);color:var(--scr-fg);white-space:pre}
+.mini .c{cursor:crosshair}
+.mini .c.cur{outline:1px solid var(--scr-cur);outline-offset:-1px}
+.mini .c.sel{background:rgba(94,169,238,.35)!important}
+.wtitle{font:12px var(--mono);color:var(--scr-dim);margin-bottom:6px}
+.inspect{font:12px var(--mono);color:var(--muted);min-height:1.5em}
+.inspect b{color:var(--ink);font-weight:500}
+
+/* signals */
+.sigwrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.sigwrap{grid-template-columns:minmax(0,1fr)}}
+.sigdia{display:grid;gap:10px}
+.sbox,.proc{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);display:grid;gap:2px}
+.sbox.k{background:var(--kern)}
+.sbox small,.proc small{font:11.5px var(--mono);color:var(--muted)}
+.proc .st{font:500 11px var(--mono);color:var(--out)}
+.conn{height:14px;margin-left:24px;border-left:2px dotted var(--muted)}
+.sess{border:1.5px dashed var(--line);border-radius:10px;padding:12px;display:grid;gap:10px}
+.pgrp{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:8px;background:var(--bg)}
+.pgrp.fg{border-color:var(--in);box-shadow:inset 3px 0 0 var(--in)}
+.pgprocs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.proc.stopped{border-style:dashed}
+.proc.stopped .st{color:var(--in)}
+.proc.dead{opacity:.45}
+.proc.dead .st{color:var(--sig)}
+.sigctl{display:grid;gap:12px}
+.narr{font-size:14px;line-height:1.5;display:grid;gap:8px;max-height:420px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-height:200px}
+.narr div{padding-left:10px;border-left:3px solid var(--line)}
+.narr .in{border-color:var(--in)}.narr .sig{border-color:var(--sig)}.narr .out{border-color:var(--out)}
+.narr .hd{border:0;padding:0;font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* render */
+.pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;counter-reset:p;list-style:none;margin:0;padding:0}
+.pipe li{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:4px;font-size:13.5px;line-height:1.45;counter-increment:p}
+.pipe li::before{content:counter(p);font:400 26px/1 var(--display);color:var(--out)}
+.pipe li b{font-weight:600}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono);font-size:13px}
+
+/* nesting */
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chain span{font:500 12.5px var(--mono);padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chain span.k{background:var(--kern)}
+.chain span.net{border-style:dashed}
+.chain i{font-style:normal;color:var(--muted);font-family:var(--mono)}
+.refs{display:grid;gap:6px;font-size:14.5px}
+footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+
+@media (prefers-reduced-motion: reduce){
+  .blk,.win.focused .screen .cur{animation:none}
+  .hit-in,.hit-out,.hit-sig,.win.bell{animation-duration:.01s}
+}
+@media (max-width:520px){
+  .kv{grid-template-columns:minmax(0,1fr)}
+  .kv>.lbl{padding-top:0}
+  .lanehead,.lrow{grid-template-columns:40px minmax(0,1fr) 40px}
+  .pkt{max-width:84px;font-size:10px}
+  .ln{grid-template-columns:70px minmax(0,1fr)}
+}
+</style>
+
+<main>
+  <header class="hero">
+    <div class="eyebrow">Terminals, from key switch to pixel</div>
+    <h1>Anatomy of a keystroke<span class="blk" aria-hidden="true"></span></h1>
+    <p class="lede">Your terminal emulator never talks to your shell. It talks to a kernel device that pretends to be a serial line from the 1970s, and that device decides what <em>echo</em>, <em>Enter</em> and <em>Ctrl+C</em> mean. Click the terminal below and type. Every key becomes a packet you can follow down the stack and back up.</p>
+    <p class="lede" style="font-size:16px;color:var(--muted)">The stack on the right gives each layer's job in a sentence. The sections below the simulator explain the parts that matter most:</p>
+    <nav class="map" aria-label="Sections">
+      <a href="#bytes"><b>Bytes, not keys</b><span>How the emulator turns a key press into bytes, and why some keys can't be told apart.</span></a>
+      <a href="#pty"><b>The PTY pair</b><span>What a pseudoterminal is, and how the emulator connects your shell to it.</span></a>
+      <a href="#ldisc"><b>The line discipline</b><span>The kernel layer that does echo, line editing and Ctrl+C, and the termios flags that control it.</span></a>
+      <a href="#parse"><b>Parsing the output</b><span>How escape sequences like <code>\e[31m</code> become colours and cursor moves.</span></a>
+      <a href="#signals"><b>Sessions and signals</b><span>Process groups, job control, and who receives Ctrl+C.</span></a>
+      <a href="#render"><b>From grid to glass</b><span>Cells, frames, glyph atlases and where latency comes from.</span></a>
+    </nav>
+  </header>
+
+  <section class="sim" aria-label="Keystroke simulator">
+    <div class="a-term">
+      <div class="win" id="win">
+        <div class="winbar"><span><b id="wtitle">bash</b> · <span id="wpts">/dev/pts/3</span></span><span id="wsize">56×14</span></div>
+        <pre class="screen" id="screen" tabindex="0" aria-label="Simulated terminal. Focus and type."></pre>
+        <div class="tip">click, then type</div>
+      </div>
+    </div>
+
+    <div class="a-ctrl ctrl">
+      <div class="hint" id="hint" hidden></div>
+      <div class="row" id="keypad" aria-label="On-screen keys"></div>
+      <div class="row" id="chips"><span class="lbl">termios <a href="#ldisc" style="text-transform:none;letter-spacing:0">what?</a></span></div>
+      <div class="row" style="justify-content:space-between">
+        <span class="fgproc">foreground: <b id="fgname">bash</b></span>
+        <span class="row">
+          <span class="seg" id="speed" aria-label="Animation speed"><button data-v="slow">slow</button><button data-v="normal">normal</button><button data-v="instant">instant</button></span>
+          <span class="seg" id="plat" aria-label="Platform"><button data-v="linux">Linux</button><button data-v="mac">macOS</button></span>
+          <button class="btn" id="reset">Reset</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="a-stack">
+      <div class="legend" style="margin-bottom:10px"><span><i style="background:var(--in)"></i>input bytes</span><span><i style="background:var(--out)"></i>output bytes</span><span><i style="background:var(--sig)"></i>signal</span><span><i style="background:var(--kern);border:1px solid var(--line)"></i>kernel</span></div>
+      <div class="lanehead"><span>in ↓</span><span></span><span>↑ out</span></div>
+      <div class="stack" id="stack"></div>
+    </div>
+
+    <div class="a-log">
+      <div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="lbl">trace</span><button class="btn" id="clearlog" style="padding:4px 8px;font-size:11px">clear</button></div>
+      <div class="log" id="log" aria-live="off"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="bytes">
+    <header>
+      <div class="eyebrow">Terminal emulator · input encoding</div>
+      <h2>Bytes, not keys</h2>
+    </header>
+    <div class="two">
+      <div class="prose">
+        <p>A PTY carries bytes, so the emulator has to flatten each key event into a byte string. The rules come from hardware terminals. Printable keys send their UTF-8. Ctrl clears bits 5 and 6 of the character, so Ctrl+C becomes <code>0x03</code>. Keys with no ASCII equivalent send escape sequences that start with ESC (<code>0x1b</code>): the up arrow is <code>ESC [ A</code>, Ctrl+Up is <code>ESC [ 1 ; 5 A</code>.</p>
+        <p>The encoding loses information. Tab and Ctrl+I are both <code>0x09</code>, Enter and Ctrl+M are both <code>0x0d</code>, and Alt+b is the same as pressing Esc and then b. Esc is also the first byte of every arrow key, so a program that reads a lone <code>0x1b</code> has to wait a few milliseconds to see whether more bytes follow. That wait is vim's <code>ttimeoutlen</code> and readline's <code>keyseq-timeout</code>.</p>
+        <p>Newer protocols fix this by encoding the key itself. In the kitty keyboard protocol, Ctrl+I arrives as <code>CSI 105;5u</code>. Emulators only send these after the application opts in with an escape sequence of its own, so legacy programs keep working.</p>
+      </div>
+      <div class="panel">
+        <div class="capture" id="cap" tabindex="0">Click here and press any key combination</div>
+        <div class="chips" id="combos"></div>
+        <div class="kv">
+          <span class="lbl">Key</span><div class="combo" id="e-key">Ctrl+C</div>
+          <span class="lbl">Legacy (xterm)</span><div><div class="bytes" id="e-leg"></div><div class="escd" id="e-legs"></div></div>
+          <span class="lbl">Kitty protocol</span><div><div class="bytes" id="e-kit"></div><div class="escd" id="e-kits"></div></div>
+          <span class="lbl">Collides with</span><div class="coll" id="e-col"></div>
+        </div>
+        <div class="bits" id="e-bits"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="pty">
+    <header>
+      <div class="eyebrow">Kernel · /dev/ptmx</div>
+      <h2>The PTY pair</h2>
+    </header>
+    <div class="two">
+      <div class="prose">
+        <p>Hardware terminals used to be separate machines connected to the computer by a serial cable. A pseudoterminal (PTY) is the kernel faking that cable in software: two character devices joined inside the kernel, so whatever goes in one end comes out the other. The emulator keeps the <b>master</b> side. The shell gets the <b>slave</b> side as file descriptors 0, 1 and 2. From the shell's point of view the slave is a serial port with a terminal plugged into it: <code>isatty(0)</code> is true, it has termios settings and a window size, and it can be a session's controlling terminal.</p>
+        <p>After setup, the emulator runs one loop. It polls the master fd. When a key arrives it encodes the key and calls <code>write()</code> on the master. When the master is readable it reads whatever the child printed, parses it, and schedules a frame.</p>
+        <p>The slave name differs by platform (<code>/dev/pts/N</code> on Linux, <code>/dev/ttysNNN</code> on macOS), but the API is POSIX and the same on both.</p>
+      </div>
+<pre class="code"><span class="k">int</span> master = <span class="f">posix_openpt</span>(O_RDWR | O_NOCTTY);
+<span class="f">grantpt</span>(master);
+<span class="f">unlockpt</span>(master);
+<span class="k">char</span> *path = <span class="f">ptsname</span>(master);      <span class="c">// "/dev/pts/3"</span>
+
+<span class="k">struct</span> winsize ws = { .ws_row = 14, .ws_col = 56 };
+<span class="f">ioctl</span>(master, TIOCSWINSZ, &amp;ws);
+
+<span class="k">if</span> (<span class="f">fork</span>() == 0) {
+    <span class="f">setsid</span>();                       <span class="c">// new session, no controlling tty</span>
+    <span class="k">int</span> slave = <span class="f">open</span>(path, O_RDWR);
+    <span class="f">ioctl</span>(slave, TIOCSCTTY, 0);      <span class="c">// becomes the controlling tty</span>
+    <span class="f">dup2</span>(slave, 0); <span class="f">dup2</span>(slave, 1); <span class="f">dup2</span>(slave, 2);
+    <span class="f">execlp</span>(<span class="s">"bash"</span>, <span class="s">"-bash"</span>, NULL);
+}
+<span class="c">// parent: poll(master) → read → parse → render
+//         key event → encode → write(master)</span></pre>
+    </div>
+  </section>
+
+  <section class="sec" id="ldisc">
+    <header>
+      <div class="eyebrow">Kernel · n_tty / termios</div>
+      <h2>The line discipline</h2>
+    </header>
+    <div class="two">
+      <div class="prose">
+        <p>Between master and slave sits the line discipline, the code that makes a terminal behave like a terminal. On Linux it lives in <code>drivers/tty/n_tty.c</code>. Its behaviour is controlled by <code>struct termios</code>, which you change with <code>stty</code> or <code>tcsetattr()</code>.</p>
+        <p>In the default canonical ("cooked") mode it collects a line, handles Backspace itself, echoes what you type and turns Ctrl+C into a signal. A program calling <code>read()</code> gets nothing until you press Enter.</p>
+        <p>Interactive programs switch most of this off. readline, vim and every TUI clear <code>ICANON</code> and <code>ECHO</code>, read each byte as it arrives and draw their own echo. You can see the difference in the simulator: when you type at the bash prompt, the output packet starts at the process. Run <code>cat</code> and it turns around inside the kernel.</p>
+      </div>
+      <div class="callout">
+        <span class="tagk">who echoes?</span>
+        <div class="prose" style="gap:10px">
+          <p style="font-size:14.5px"><b>Cooked mode:</b> the kernel. The letter is on screen before the program has woken up, and a program that is busy or hung still shows your typing.</p>
+          <p style="font-size:14.5px"><b>Raw mode:</b> the program. If it stalls, typing appears to stop. Over ssh you wait a full network round trip for each character, because the remote readline does the echo.</p>
+          <p style="font-size:14.5px"><code>cfmakeraw()</code> clears all of these flags at once. ssh does that to your local terminal so every byte, including <code>0x03</code>, travels to the remote line discipline untouched.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Flag</th><th>What it does</th><th>Experiment</th></tr></thead>
+        <tbody id="flagtable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="sec" id="parse">
+    <header>
+      <div class="eyebrow">Terminal emulator · output parsing</div>
+      <h2>Parsing the output</h2>
+      <p>Output is one byte stream with commands mixed into the text. Most emulators parse it with a version of the state machine Paul Williams documented for DEC's VT500 series. It defines a transition for every byte in every state, so garbage input can't wedge the parser. In GROUND, a printable byte draws a cell and advances the cursor. ESC starts a sequence; the final byte of a CSI sequence selects the command, and the parameters collected on the way are its arguments.</p>
+    </header>
+    <div class="panel">
+      <div class="inrow">
+        <input id="vtin" aria-label="Bytes to parse (escapes like \e \r \n \x1b allowed)" spellcheck="false" autocomplete="off">
+        <button class="btn" id="vtload">Load</button>
+        <button class="btn" id="vtfromsim" title="The last bytes the simulator's emulator read from the PTY">From simulator</button>
+      </div>
+      <div class="chips" id="vtpresets"></div>
+      <div class="tape" id="tape"></div>
+      <div class="row">
+        <button class="btn" id="vtreset">⏮ Reset</button>
+        <button class="btn" id="vtback">◀ Back</button>
+        <button class="btn" id="vtstep">Step ▶</button>
+        <button class="btn" id="vtplay">Play</button>
+        <button class="btn" id="vtend">To end ⏭</button>
+      </div>
+      <div class="vtgrid">
+        <div class="svgwrap">
+          <svg viewBox="0 0 680 290" id="fsm" role="img" aria-label="VT parser state machine">
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arh" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="arh2" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <path class="edge" id="e-a" d="M55,238 L55,72"/>
+            <text class="elbl" x="49" y="160" text-anchor="end">ESC</text>
+            <path class="edge" id="e-d" d="M95,72 L95,238"/>
+            <text class="elbl" x="101" y="112">final</text>
+            <path class="edge" id="e-b" d="M185,50 L253,50"/>
+            <text class="elbl" x="219" y="42" text-anchor="middle">[</text>
+            <path class="edge" id="e-c" d="M150,72 L188,138"/>
+            <text class="elbl" x="176" y="100">]</text>
+            <path class="edge" id="e-e" d="M405,50 L483,50"/>
+            <text class="elbl" x="444" y="42" text-anchor="middle">0–9 ; ?</text>
+            <path class="edge" id="e-f" d="M372,72 L428,138"/>
+            <text class="elbl" x="404" y="100">0x20–2F</text>
+            <path class="edge" id="e-g" d="M300,72 L300,238"/>
+            <text class="elbl" x="306" y="122">final 0x40–7E</text>
+            <path class="edge" id="e-h" d="M540,72 L500,138"/>
+            <text class="elbl" x="528" y="108">0x20–2F</text>
+            <path class="edge" id="e-i" d="M610,72 L610,238"/>
+            <text class="elbl" x="616" y="160">final</text>
+            <path class="edge" id="e-j" d="M460,182 L460,238"/>
+            <text class="elbl" x="466" y="214">final</text>
+            <path class="edge" id="e-k" d="M200,182 L200,238"/>
+            <text class="elbl" x="206" y="214">BEL / ST</text>
+            <g class="node" id="n-ESCAPE"><rect x="35" y="30" width="150" height="42" rx="6"/><text x="110" y="48" text-anchor="middle">ESCAPE</text><text class="s" x="110" y="63" text-anchor="middle">collect 0x20–2F</text></g>
+            <g class="node" id="n-CSI_ENTRY"><rect x="255" y="30" width="150" height="42" rx="6"/><text x="330" y="48" text-anchor="middle">CSI_ENTRY</text><text class="s" x="330" y="63" text-anchor="middle">clear params</text></g>
+            <g class="node" id="n-CSI_PARAM"><rect x="485" y="30" width="150" height="42" rx="6"/><text x="560" y="48" text-anchor="middle">CSI_PARAM</text><text class="s" x="560" y="63" text-anchor="middle">↻ param</text></g>
+            <g class="node" id="n-OSC_STRING"><rect x="125" y="140" width="150" height="42" rx="6"/><text x="200" y="158" text-anchor="middle">OSC_STRING</text><text class="s" x="200" y="173" text-anchor="middle">↻ osc_put</text></g>
+            <g class="node" id="n-CSI_INTERMEDIATE"><rect x="380" y="140" width="160" height="42" rx="6"/><text x="460" y="158" text-anchor="middle">CSI_INTERMEDIATE</text><text class="s" x="460" y="173" text-anchor="middle">↻ collect</text></g>
+            <g class="node" id="n-GROUND"><rect x="20" y="240" width="640" height="40" rx="6"/><text x="340" y="258" text-anchor="middle">GROUND</text><text class="s" x="340" y="272" text-anchor="middle">print 0x20–7E · execute C0 (CR, LF, BS, HT, BEL)</text></g>
+          </svg>
+        </div>
+        <div style="display:grid;gap:14px;min-width:0">
+          <div class="stepinfo" id="stepinfo"></div>
+          <div class="bufs" id="bufs"></div>
+          <div class="mini">
+            <div class="wtitle" id="minititle">window title: (none)</div>
+            <pre id="minigrid"></pre>
+          </div>
+          <div class="inspect" id="inspect">Hover a cell to see what the grid stores for it.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="signals">
+    <header>
+      <div class="eyebrow">Kernel · sessions, process groups, job control</div>
+      <h2>Sessions and signals</h2>
+      <p>Ctrl+C works because of bookkeeping the kernel keeps for each terminal. The emulator's child calls <code>setsid()</code> and becomes leader of a new session, and the slave becomes that session's controlling terminal. The shell puts each job in its own process group and tells the terminal which group is in the foreground with <code>tcsetpgrp()</code>. Signals generated by the line discipline go to that whole group. That is why Ctrl+C kills every process in a pipeline and leaves the shell alone.</p>
+    </header>
+    <div class="sigwrap">
+      <div class="sigdia">
+        <div class="sbox" id="s-term"><b>Terminal emulator</b><small>holds the master fd · window <span id="s-size">80×24</span></small></div>
+        <div class="conn"></div>
+        <div class="sbox k" id="s-tty"><b>/dev/pts/3 + line discipline</b><small>controlling tty of session 4120 · foreground pgrp <b id="s-fg">4200</b></small></div>
+        <div class="conn"></div>
+        <div class="sess">
+          <div class="lbl">session 4120</div>
+          <div class="pgrp" id="g-shell">
+            <div class="lbl">pgrp 4120</div>
+            <div class="pgprocs"><div class="proc" id="p-bash"><b>bash</b><small>pid 4120 · session leader</small><span class="st">waitpid() for job 1</span></div></div>
+          </div>
+          <div class="pgrp fg" id="g-job">
+            <div class="lbl">pgrp 4200 · job 1: sleep 100 | grep x</div>
+            <div class="pgprocs">
+              <div class="proc" id="p-sleep"><b>sleep</b><small>pid 4200</small><span class="st">running</span></div>
+              <div class="proc" id="p-grep"><b>grep</b><small>pid 4201</small><span class="st">running</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sigctl">
+        <div class="row">
+          <button class="key" id="sg-c">Ctrl+C</button>
+          <button class="key" id="sg-z">Ctrl+Z</button>
+          <button class="btn" id="sg-fg">fg</button>
+          <button class="btn" id="sg-rs">Resize window</button>
+          <button class="btn" id="sg-cl">Close window</button>
+          <button class="btn" id="sg-reset">Reset</button>
+        </div>
+        <div class="narr" id="narr" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="render">
+    <header>
+      <div class="eyebrow">Terminal emulator · rendering</div>
+      <h2>From grid to glass</h2>
+      <p>The emulator's model is a grid of cells: a codepoint plus foreground, background and flags, with a cursor and a scrollback ring. Parsing changes the grid. Drawing is a separate step that runs on the display's frame clock. <code>cat</code> on a big file can produce megabytes between two frames, so a good emulator parses everything that arrived and draws once.</p>
+    </header>
+    <ol class="pipe">
+      <li><b>Drain</b>read() the master in large chunks until it would block.</li>
+      <li><b>Parse</b>Run the VT state machine. Prints write cells; CSI and OSC change cursor, attributes or modes.</li>
+      <li><b>Mark damage</b>Record which rows changed, so a one-character echo redraws one row.</li>
+      <li><b>Wait for frame</b>vsync, a Wayland frame callback or CVDisplayLink. Many reads become one frame.</li>
+      <li><b>Shape and rasterize</b>Text runs become glyphs (HarfBuzz, CoreText), cached in a glyph atlas texture.</li>
+      <li><b>Draw</b>Background quads, then instanced glyph quads, in a few GPU draw calls.</li>
+      <li><b>Present</b>The compositor combines windows; the display scans the frame out.</li>
+    </ol>
+    <div class="two">
+      <div class="prose">
+        <p>Applications that redraw a lot, such as editors and multiplexers, can bracket an update with <code>CSI ? 2026 h</code> and <code>CSI ? 2026 l</code> (synchronized output). The emulator holds rendering until the closing sequence, so you never see a half-drawn screen.</p>
+        <p>The table shows where key-to-photon time goes. The kernel and PTY are almost free. Most of the delay comes from polling and frame boundaries on either side of them.</p>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Stage</th><th>Rough range</th></tr></thead>
+          <tbody>
+            <tr><td>Keyboard matrix scan and debounce</td><td class="num">1–10 ms</td></tr>
+            <tr><td>USB polling interval (125 Hz to 1 kHz)</td><td class="num">1–8 ms</td></tr>
+            <tr><td>Kernel input, compositor dispatch</td><td class="num">&lt; 1 ms</td></tr>
+            <tr><td>Encode, write(), line discipline, read()</td><td class="num">µs</td></tr>
+            <tr><td>Application echo (readline, vim)</td><td class="num">µs – ms</td></tr>
+            <tr><td>Emulator waits for its next frame (60 Hz)</td><td class="num">0–16.7 ms</td></tr>
+            <tr><td>Compositor, scanout, panel response</td><td class="num">8–30 ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="nesting">
+    <header>
+      <div class="eyebrow">Composition</div>
+      <h2>Terminals all the way down</h2>
+      <p>Every piece of this stack can be repeated. A program that owns a PTY master and renders what it reads is a terminal emulator, whether or not it draws pixels.</p>
+    </header>
+    <div class="panel">
+      <h3>ssh</h3>
+      <div class="chain"><span>emulator</span><i>⇄</i><span class="k">pty A (raw)</span><i>⇄</i><span>ssh</span><i>⇄</i><span class="net">TCP, encrypted channel</span><i>⇄</i><span>sshd</span><i>⇄</i><span class="k">pty B (cooked)</span><i>⇄</i><span>bash</span></div>
+      <p style="font-size:14.5px">ssh puts pty A in raw mode, so Ctrl+C crosses the network as the byte <code>0x03</code>. pty B's line discipline on the server turns it into SIGINT. When your window changes size, ssh catches SIGWINCH and sends a <code>window-change</code> request; sshd applies it to pty B with <code>TIOCSWINSZ</code>.</p>
+    </div>
+    <div class="panel">
+      <h3>tmux</h3>
+      <div class="chain"><span>emulator</span><i>⇄</i><span class="k">pty A (raw)</span><i>⇄</i><span>tmux client</span><i>⇄</i><span class="net">unix socket</span><i>⇄</i><span>tmux server: one grid per pane</span><i>⇄</i><span class="k">pty per pane</span><i>⇄</i><span>shell, vim, …</span></div>
+      <p style="font-size:14.5px">The tmux server is a full emulator. It parses each pane's output into its own grid, then writes new escape sequences that draw the visible result on your outer terminal. A feature such as truecolor or the kitty keyboard protocol only works if both tmux and the outer emulator support it, which is why <code>TERM</code> inside tmux is <code>tmux-256color</code> and not your emulator's value.</p>
+    </div>
+    <div class="refs">
+      <span class="lbl">Primary sources</span>
+      <a href="https://vt100.net/emu/dec_ansi_parser">Paul Williams: A parser for DEC's ANSI-compatible video terminals</a>
+      <a href="https://invisible-island.net/xterm/ctlseqs/ctlseqs.html">XTerm control sequences (Thomas Dickey)</a>
+      <a href="https://github.com/torvalds/linux/blob/master/drivers/tty/n_tty.c">drivers/tty/n_tty.c in the Linux kernel</a>
+      <a href="https://sw.kovidgoyal.net/kitty/keyboard-protocol/">The kitty keyboard protocol</a>
+      <a href="https://www.linusakesson.net/programming/tty/">Linus Åkesson: The TTY demystified</a>
+    </div>
+  </section>
+
+  <footer>The simulator models one keypress at a time with simplified readline, cat and n_tty behaviour. The VT parser is real: everything on the simulated screen was drawn by feeding it the bytes shown in the trace.</footer>
+</main>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const enc = new TextEncoder(), dec = new TextDecoder();
+const hex2 = n => n.toString(16).padStart(2, '0');
+const hexs = b => Array.from(b, hex2).join(' ');
+const eh = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const C0N = ['NUL','SOH','STX','ETX','EOT','ENQ','ACK','BEL','BS','HT','LF','VT','FF','CR','SO','SI','DLE','DC1','DC2','DC3','DC4','NAK','SYN','ETB','CAN','EM','SUB','ESC','FS','GS','RS','US'];
+const CN = ['black','red','green','yellow','blue','magenta','cyan','white'];
+const caret = b => b === 0x7f ? '^?' : '^' + String.fromCharCode(b + 0x40);
+function escBytes(bytes) {
+  let s = '';
+  for (const ch of dec.decode(new Uint8Array(bytes))) {
+    const c = ch.codePointAt(0);
+    if (c === 0x1b) s += '\\e'; else if (c === 10) s += '\\n'; else if (c === 13) s += '\\r';
+    else if (c === 9) s += '\\t'; else if (c === 7) s += '\\a'; else if (c === 8) s += '\\b';
+    else if (c === 0x22) s += '\\"'; else if (c === 0x5c) s += '\\\\';
+    else if (c < 0x20 || c === 0x7f) s += '\\x' + hex2(c); else s += ch;
+  }
+  return s;
+}
+const trunc = (s, n) => s.length > n ? s.slice(0, n - 1) + '…' : s;
+const lbl = b => !b.length ? 'EOF' : b.length <= 3 ? hexs(b) : '"' + trunc(escBytes(b), 11) + '"';
+const toBytes = x => typeof x === 'string' ? [...enc.encode(x)] : x;
+
+/* ---------- key tables ---------- */
+const KEYS = {};
+const evL = {a:30,b:48,c:46,d:32,e:18,f:33,g:34,h:35,i:23,j:36,k:37,l:38,m:50,n:49,o:24,p:25,q:16,r:19,s:31,t:20,u:22,v:47,w:17,x:45,y:21,z:44};
+const macL = {a:0,b:11,c:8,d:2,e:14,f:3,g:5,h:4,i:34,j:38,k:40,l:37,m:46,n:45,o:31,p:35,q:12,r:15,s:1,t:17,u:32,v:9,w:13,x:7,y:16,z:6};
+[...'abcdefghijklmnopqrstuvwxyz'].forEach((l, i) => KEYS['Key' + l.toUpperCase()] = {hid: 4 + i, ev: evL[l], evName: 'KEY_' + l.toUpperCase(), mac: macL[l], base: l});
+const macD = [29,18,19,20,21,23,22,26,28,25];
+for (let d = 0; d < 10; d++) KEYS['Digit' + d] = {hid: d === 0 ? 0x27 : 0x1d + d, ev: d === 0 ? 11 : d + 1, evName: 'KEY_' + d, mac: macD[d], base: String(d)};
+Object.assign(KEYS, {
+  Enter: {hid:0x28, ev:28, evName:'KEY_ENTER', mac:36, sym:'Return', name:'Enter', ns:'\\r'},
+  Escape: {hid:0x29, ev:1, evName:'KEY_ESC', mac:53, sym:'Escape', name:'Esc', ns:'\\e'},
+  Backspace: {hid:0x2a, ev:14, evName:'KEY_BACKSPACE', mac:51, sym:'BackSpace', name:'Backspace', ns:'\\x7f'},
+  Tab: {hid:0x2b, ev:15, evName:'KEY_TAB', mac:48, sym:'Tab', name:'Tab', ns:'\\t'},
+  Space: {hid:0x2c, ev:57, evName:'KEY_SPACE', mac:49, base:' ', name:'Space'},
+  Minus: {hid:0x2d, ev:12, evName:'KEY_MINUS', mac:27, base:'-'},
+  Equal: {hid:0x2e, ev:13, evName:'KEY_EQUAL', mac:24, base:'='},
+  BracketLeft: {hid:0x2f, ev:26, evName:'KEY_LEFTBRACE', mac:33, base:'['},
+  BracketRight: {hid:0x30, ev:27, evName:'KEY_RIGHTBRACE', mac:30, base:']'},
+  Backslash: {hid:0x31, ev:43, evName:'KEY_BACKSLASH', mac:42, base:'\\'},
+  Semicolon: {hid:0x33, ev:39, evName:'KEY_SEMICOLON', mac:41, base:';'},
+  Quote: {hid:0x34, ev:40, evName:'KEY_APOSTROPHE', mac:39, base:"'"},
+  Backquote: {hid:0x35, ev:41, evName:'KEY_GRAVE', mac:50, base:'`'},
+  Comma: {hid:0x36, ev:51, evName:'KEY_COMMA', mac:43, base:','},
+  Period: {hid:0x37, ev:52, evName:'KEY_DOT', mac:47, base:'.'},
+  Slash: {hid:0x38, ev:53, evName:'KEY_SLASH', mac:44, base:'/'},
+  ArrowRight: {hid:0x4f, ev:106, evName:'KEY_RIGHT', mac:124, sym:'Right', csi:'C', name:'→', ns:'\\uf703'},
+  ArrowLeft: {hid:0x50, ev:105, evName:'KEY_LEFT', mac:123, sym:'Left', csi:'D', name:'←', ns:'\\uf702'},
+  ArrowDown: {hid:0x51, ev:108, evName:'KEY_DOWN', mac:125, sym:'Down', csi:'B', name:'↓', ns:'\\uf701'},
+  ArrowUp: {hid:0x52, ev:103, evName:'KEY_UP', mac:126, sym:'Up', csi:'A', name:'↑', ns:'\\uf700'},
+  Home: {hid:0x4a, ev:102, evName:'KEY_HOME', mac:115, sym:'Home', csi:'H', name:'Home', ns:'\\uf729'},
+  End: {hid:0x4d, ev:107, evName:'KEY_END', mac:119, sym:'End', csi:'F', name:'End', ns:'\\uf72b'},
+  Delete: {hid:0x4c, ev:111, evName:'KEY_DELETE', mac:117, sym:'Delete', tilde:3, name:'Del', ns:'\\uf728'},
+});
+const SYMN = {' ':'space','-':'minus','=':'equal','[':'bracketleft',']':'bracketright','\\':'backslash',';':'semicolon',"'":'apostrophe','`':'grave',',':'comma','.':'period','/':'slash'};
+
+function keyLabel(k) {
+  const info = KEYS[k.code] || {};
+  let name = info.name || (k.ch === ' ' ? 'Space' : k.ch) || '?';
+  if (!info.name && k.ch && !k.ctrl && !k.alt) return name;
+  if (!info.name && k.ch && k.ctrl && /^[a-z]$/i.test(k.ch)) name = k.ch.toUpperCase();
+  return (k.ctrl ? 'Ctrl+' : '') + (k.alt ? 'Alt+' : '') + (k.shift && (info.name || k.ctrl || k.alt) ? 'Shift+' : '') + name;
+}
+function symName(k) {
+  const info = KEYS[k.code] || {};
+  if (info.sym) return info.sym;
+  const ch = k.ch || info.base || '?';
+  if (/^[a-zA-Z0-9]$/.test(ch)) return ch;
+  return SYMN[ch] || 'U' + ch.codePointAt(0).toString(16).toUpperCase();
+}
+function encodeLegacy(k) {
+  const info = KEYS[k.code] || {};
+  const m = 1 + (k.shift ? 1 : 0) + (k.alt ? 2 : 0) + (k.ctrl ? 4 : 0);
+  if (info.csi) return toBytes(m > 1 ? `\x1b[1;${m}${info.csi}` : `\x1b[${info.csi}`);
+  if (info.tilde) return toBytes(m > 1 ? `\x1b[${info.tilde};${m}~` : `\x1b[${info.tilde}~`);
+  const A = b => k.alt ? [0x1b, ...b] : b;
+  switch (k.code) {
+    case 'Enter': return A([0x0d]);
+    case 'Tab': return k.shift ? toBytes('\x1b[Z') : A([0x09]);
+    case 'Backspace': return A([k.ctrl ? 0x08 : 0x7f]);
+    case 'Escape': return [0x1b];
+  }
+  if (!k.ch) return null;
+  let b;
+  if (k.ctrl) {
+    const c = k.ch.toLowerCase(), cc = c.charCodeAt(0);
+    if ((c >= 'a' && c <= 'z') || '@[\\]^_'.includes(k.ch)) b = [cc & 0x1f];
+    else if (c === ' ' || c === '2') b = [0];
+    else if (c === '/') b = [0x1f];
+    else if (c >= '3' && c <= '7') b = [0x1b + (cc - 0x33)];
+    else if (c === '8') b = [0x7f];
+    else b = toBytes(k.ch);
+  } else b = toBytes(k.ch);
+  return A(b);
+}
+function encodeKitty(k) {
+  const info = KEYS[k.code] || {};
+  const m = 1 + (k.shift ? 1 : 0) + (k.alt ? 2 : 0) + (k.ctrl ? 4 : 0);
+  if (info.csi || info.tilde) return encodeLegacy(k);
+  const fn = {Enter: 13, Tab: 9, Backspace: 127, Escape: 27}[k.code];
+  if (fn !== undefined) {
+    if (k.code === 'Escape') return toBytes(m > 1 ? `\x1b[27;${m}u` : '\x1b[27u');
+    if (m === 1) return encodeLegacy(k);
+    return toBytes(`\x1b[${fn};${m}u`);
+  }
+  if (!k.ch) return null;
+  if (!k.ctrl && !k.alt) return toBytes(k.ch);
+  const base = (info.base || k.ch.toLowerCase()).codePointAt(0);
+  return toBytes(`\x1b[${base};${m}u`);
+}
+function charKey(ch) {
+  if (ch === '\r') return {code: 'Enter'};
+  if (/[a-z]/.test(ch)) return {code: 'Key' + ch.toUpperCase(), ch};
+  if (/[A-Z]/.test(ch)) return {code: 'Key' + ch, ch, shift: true};
+  if (/[0-9]/.test(ch)) return {code: 'Digit' + ch, ch};
+  if (ch === ' ') return {code: 'Space', ch};
+  for (const [code, v] of Object.entries(KEYS)) if (v.base === ch) return {code, ch};
+  return {code: '', ch};
+}
+
+/* ---------- VT parser + screen model ---------- */
+const PAL16 = ['#1c2129','#e0605a','#7cc47a','#e6b450','#5fa3e8','#c38ae0','#5fc4c4','#c9d1d9','#4a5361','#ff7b72','#9bdb8f','#f2cc60','#79b8ff','#d2a8ff','#7ee0e0','#f0f3f6'];
+function color256(n) {
+  if (n < 16) return PAL16[n];
+  if (n < 232) { n -= 16; const v = x => x ? 55 + x * 40 : 0; return `rgb(${v(Math.floor(n / 36))},${v(Math.floor(n / 6) % 6)},${v(n % 6)})`; }
+  const l = 8 + (n - 232) * 10; return `rgb(${l},${l},${l})`;
+}
+const DEF = Object.freeze({fg: null, bg: null, b: 0, d: 0, i: 0, u: 0, v: 0});
+const col = c => typeof c === 'number' ? color256(c) : c;
+function cssA(a) {
+  if (a === DEF) return '';
+  let fg = a.fg == null ? null : col(a.fg), bg = a.bg == null ? null : col(a.bg);
+  if (a.v) { const f = fg || 'var(--scr-fg)'; fg = bg || 'var(--scr-bg)'; bg = f; }
+  let s = '';
+  if (fg) s += `color:${fg};`; if (bg) s += `background:${bg};`;
+  if (a.b) s += 'font-weight:700;'; if (a.d) s += 'opacity:.55;';
+  if (a.i) s += 'font-style:italic;'; if (a.u) s += 'text-decoration:underline;';
+  return s;
+}
+class VT {
+  constructor(cols, rows) { this.cols = cols; this.rows = rows; this.onBell = () => {}; this.onTitle = () => {}; this.reset(); }
+  reset() {
+    this.a = DEF; this.grid = Array.from({length: this.rows}, () => this.blank());
+    this.x = 0; this.y = 0; this.st = 'GROUND'; this.clr(); this.osc = ''; this.u8 = []; this.u8n = 0;
+    this.curVis = true; this.sv = null; this.alt = null; this.title = '';
+  }
+  clr() { this.p = ''; this.it = ''; this.pv = ''; }
+  blank() { return Array.from({length: this.cols}, () => ({c: ' ', a: DEF})); }
+  cx() { return Math.min(this.x, this.cols - 1); }
+  r(b, from, act, desc, o) { return Object.assign({b, from, to: this.st, act, desc}, o || {}); }
+  feed(b) {
+    const from = this.st;
+    if ((b === 0x18 || b === 0x1a) && from !== 'GROUND') { this.st = 'GROUND'; return this.r(b, from, 'execute', `${C0N[b]} cancels the sequence`, {short: C0N[b]}); }
+    if (from === 'GROUND') {
+      if (this.u8n) {
+        if ((b & 0xc0) === 0x80) {
+          this.u8.push(b);
+          if (this.u8.length === this.u8n) {
+            const ch = dec.decode(new Uint8Array(this.u8)); this.u8 = []; this.u8n = 0;
+            const at = this.put(ch);
+            return this.r(b, from, 'print', `print "${ch}" (U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}) ${at}`, {ch});
+          }
+          return this.r(b, from, 'collect', 'UTF-8 continuation byte, keep collecting');
+        }
+        this.u8 = []; this.u8n = 0;
+      }
+      if (b === 0x1b) { this.st = 'ESCAPE'; this.clr(); return this.r(b, from, 'clear', 'ESC starts an escape sequence'); }
+      if (b < 0x20) return this.r(b, from, 'execute', this.exec(b), {short: C0N[b]});
+      if (b === 0x7f) return this.r(b, from, 'ignore', 'DEL is ignored');
+      if (b >= 0xc0) { this.u8 = [b]; this.u8n = b >= 0xf0 ? 4 : b >= 0xe0 ? 3 : 2; return this.r(b, from, 'collect', `UTF-8 lead byte of a ${this.u8n}-byte character`); }
+      if (b >= 0x80) return this.r(b, from, 'ignore', 'stray continuation byte');
+      const ch = String.fromCharCode(b), at = this.put(ch);
+      return this.r(b, from, 'print', `print "${ch}" ${at}`, {ch});
+    }
+    if (from === 'OSC_STRING') {
+      if (b === 0x07) { this.st = 'GROUND'; const [mn, d] = this.oscEnd(); return this.r(b, from, 'osc_dispatch', d + ' (ended by BEL)', {short: mn}); }
+      if (b === 0x1b) { this.st = 'ESCAPE'; this.clr(); const [mn, d] = this.oscEnd(); return this.r(b, from, 'osc_dispatch', d + ' (ESC starts the ST terminator)', {short: mn}); }
+      if (b < 0x20) return this.r(b, from, 'ignore', 'C0 inside an OSC string is ignored');
+      this.osc += String.fromCharCode(b);
+      return this.r(b, from, 'osc_put', `append to OSC string → "${this.osc}"`);
+    }
+    if (b === 0x1b) { this.st = 'ESCAPE'; this.clr(); return this.r(b, from, 'clear', 'ESC abandons the current sequence and starts a new one'); }
+    if (b < 0x20) return this.r(b, from, 'execute', this.exec(b) + ' (C0 controls execute even mid-sequence)', {short: C0N[b]});
+    const c = String.fromCharCode(b);
+    if (from === 'ESCAPE') {
+      if (c === '[') { this.st = 'CSI_ENTRY'; return this.r(b, from, 'clear', '"[" makes this a CSI (Control Sequence Introducer)'); }
+      if (c === ']') { this.st = 'OSC_STRING'; this.osc = ''; return this.r(b, from, 'osc_start', '"]" makes this an OSC (Operating System Command)'); }
+      if (b >= 0x20 && b <= 0x2f) { this.it += c; return this.r(b, from, 'collect', `intermediate "${c}"`); }
+      if (b === 0x7f) return this.r(b, from, 'ignore', 'DEL ignored');
+      this.st = 'GROUND'; const [mn, d] = this.esc(c);
+      return this.r(b, from, 'esc_dispatch', d, {short: mn});
+    }
+    if (b >= 0x40 && b <= 0x7e) { this.st = 'GROUND'; const [mn, d] = this.csi(c); return this.r(b, from, 'csi_dispatch', d, {short: mn}); }
+    if (from === 'CSI_INTERMEDIATE') {
+      if (b >= 0x20 && b <= 0x2f) { this.it += c; return this.r(b, from, 'collect', `intermediate "${c}"`); }
+      return this.r(b, from, 'ignore', 'parameter after an intermediate: malformed, ignored');
+    }
+    if (b >= 0x20 && b <= 0x2f) { this.it += c; this.st = 'CSI_INTERMEDIATE'; return this.r(b, from, 'collect', `intermediate "${c}"`); }
+    if ((b >= 0x30 && b <= 0x39) || b === 0x3b || b === 0x3a) { this.p += c; this.st = 'CSI_PARAM'; return this.r(b, from, 'param', `parameter byte → params "${this.p}"`); }
+    if (b >= 0x3c && b <= 0x3f) {
+      if (from === 'CSI_ENTRY') { this.pv += c; this.st = 'CSI_PARAM'; return this.r(b, from, 'collect', `private marker "${c}"`); }
+      return this.r(b, from, 'ignore', 'private marker out of place');
+    }
+    return this.r(b, from, 'ignore', '');
+  }
+  put(ch) {
+    let wrapped = false;
+    if (this.x >= this.cols) { this.x = 0; this.lf(); wrapped = true; }
+    const at = `at row ${this.y + 1}, col ${this.x + 1}${wrapped ? ' (deferred wrap to the next line)' : ''}`;
+    this.grid[this.y][this.x] = {c: ch, a: this.a}; this.x++;
+    return at;
+  }
+  lf() { if (this.y >= this.rows - 1) { this.grid.shift(); this.grid.push(this.blank()); return true; } this.y++; return false; }
+  exec(b) {
+    switch (b) {
+      case 7: this.onBell(); return 'BEL: ring the bell';
+      case 8: this.x = Math.max(0, this.cx() - 1); return 'BS: cursor left one column (nothing is erased)';
+      case 9: this.x = Math.min(this.cols - 1, (Math.floor(this.cx() / 8) + 1) * 8); return 'HT: cursor to the next tab stop';
+      case 10: case 11: case 12: { const s = this.lf(); return `${C0N[b]}: cursor down one row, same column${s ? '; the screen scrolls up' : ''}`; }
+      case 13: this.x = 0; return 'CR: cursor to column 1';
+      default: return `${C0N[b]}: no effect here`;
+    }
+  }
+  esc(c) {
+    if (this.it) {
+      const it = this.it, g = '()*+'.indexOf(it);
+      if (g >= 0) return [`ESC ${it}${c}`, `designate G${g} character set "${c}"${c === 'B' ? ' (US-ASCII)' : c === '0' ? ' (DEC line drawing)' : ''}`];
+      return [`ESC ${it}${c}`, 'escape with intermediate, not modelled here'];
+    }
+    switch (c) {
+      case '7': this.sv = {x: this.x, y: this.y, a: this.a}; return ['ESC 7 DECSC', 'DECSC: save cursor position and attributes'];
+      case '8': if (this.sv) { this.x = this.sv.x; this.y = this.sv.y; this.a = this.sv.a; } return ['ESC 8 DECRC', 'DECRC: restore the saved cursor'];
+      case 'M': if (this.y === 0) { this.grid.pop(); this.grid.unshift(this.blank()); } else this.y--; return ['ESC M RI', 'RI: reverse index, cursor up (scrolls down at the top)'];
+      case 'D': this.lf(); return ['ESC D IND', 'IND: index, cursor down'];
+      case 'E': this.x = 0; this.lf(); return ['ESC E NEL', 'NEL: next line'];
+      case 'c': this.reset(); return ['ESC c RIS', 'RIS: full reset'];
+      case '\\': return ['ESC \\ ST', 'ST: string terminator'];
+      case '=': return ['ESC = DECKPAM', 'DECKPAM: application keypad mode'];
+      case '>': return ['ESC > DECKPNM', 'DECKPNM: normal keypad mode'];
+      default: return [`ESC ${c}`, 'escape sequence not modelled here'];
+    }
+  }
+  oscEnd() {
+    const s = this.osc, i = s.indexOf(';'), cmd = i < 0 ? s : s.slice(0, i), arg = i < 0 ? '' : s.slice(i + 1);
+    if (cmd === '0' || cmd === '2') { this.title = arg; this.onTitle(arg); return [`OSC ${cmd}`, `OSC ${cmd}: set the window title to "${arg}"`]; }
+    if (cmd === '7') return ['OSC 7', `OSC 7: the shell reports its working directory, ${arg}`];
+    if (cmd === '8') return ['OSC 8', 'OSC 8: start or end a hyperlink'];
+    if (cmd === '52') return ['OSC 52', 'OSC 52: write to the system clipboard'];
+    if (cmd === '133') return ['OSC 133', `OSC 133;${arg}: semantic prompt mark`];
+    return [`OSC ${cmd}`, `OSC ${cmd}: not modelled here`];
+  }
+  csi(f) {
+    const ps = this.p === '' ? [] : this.p.split(/[;:]/).map(s => s === '' ? null : parseInt(s, 10));
+    const n = (i, d) => { const v = ps[i]; return v == null || v === 0 ? d : v; };
+    const seq = `${this.pv}${this.p}${this.it}${f}`, m0 = ps[0] ?? 0;
+    const cl = (v, max) => Math.max(0, Math.min(max, v));
+    const er = (y, s, e) => { for (let i = s; i < e; i++) this.grid[y][i] = {c: ' ', a: DEF}; };
+    if (this.pv === '?' && (f === 'h' || f === 'l')) {
+      const on = f === 'h';
+      const names = {1: 'DECCKM application cursor keys', 25: 'cursor visible', 47: 'alternate screen', 1049: 'alternate screen buffer', 2004: 'bracketed paste', 2026: 'synchronized output', 1000: 'mouse reporting', 1006: 'SGR mouse encoding'};
+      const list = ps.map(p => {
+        if (p === 25) this.curVis = on;
+        if (p === 1049 || p === 47) {
+          if (on && !this.alt) { this.alt = {grid: this.grid, x: this.x, y: this.y}; this.grid = Array.from({length: this.rows}, () => this.blank()); }
+          else if (!on && this.alt) { this.grid = this.alt.grid; this.x = this.alt.x; this.y = this.alt.y; this.alt = null; }
+        }
+        return `?${p} ${names[p] || 'private mode'}`;
+      });
+      return [`CSI ${seq} ${on ? 'DECSET' : 'DECRST'}`, `${on ? 'DECSET, enable' : 'DECRST, disable'}: ${list.join(', ')}`];
+    }
+    if (this.pv) return [`CSI ${seq}`, 'private sequence, not modelled here'];
+    switch (f) {
+      case 'A': { const k = n(0, 1); this.y = cl(this.y - k, this.rows - 1); this.x = this.cx(); return [`CSI ${seq} CUU`, `CUU: cursor up ${k}`]; }
+      case 'B': { const k = n(0, 1); this.y = cl(this.y + k, this.rows - 1); this.x = this.cx(); return [`CSI ${seq} CUD`, `CUD: cursor down ${k}`]; }
+      case 'C': { const k = n(0, 1); this.x = cl(this.cx() + k, this.cols - 1); return [`CSI ${seq} CUF`, `CUF: cursor right ${k}`]; }
+      case 'D': { const k = n(0, 1); this.x = cl(this.cx() - k, this.cols - 1); return [`CSI ${seq} CUB`, `CUB: cursor left ${k}`]; }
+      case 'G': { const c = n(0, 1); this.x = cl(c - 1, this.cols - 1); return [`CSI ${seq} CHA`, `CHA: cursor to column ${c}`]; }
+      case 'H': case 'f': { const r = n(0, 1), c = n(1, 1); this.y = cl(r - 1, this.rows - 1); this.x = cl(c - 1, this.cols - 1); return [`CSI ${seq} CUP`, `CUP: cursor to row ${r}, column ${c}`]; }
+      case 'J': {
+        if (m0 === 0) { er(this.y, this.cx(), this.cols); for (let y = this.y + 1; y < this.rows; y++) er(y, 0, this.cols); }
+        else if (m0 === 1) { for (let y = 0; y < this.y; y++) er(y, 0, this.cols); er(this.y, 0, this.cx() + 1); }
+        else for (let y = 0; y < this.rows; y++) er(y, 0, this.cols);
+        return [`CSI ${seq} ED`, `ED ${m0}: erase ${['from the cursor to the end of the screen', 'from the top of the screen to the cursor', 'the entire screen', 'the screen and scrollback'][m0] || '?'}`];
+      }
+      case 'K': {
+        const cx = this.cx(), [s, e] = m0 === 0 ? [cx, this.cols] : m0 === 1 ? [0, cx + 1] : [0, this.cols];
+        er(this.y, s, e);
+        return [`CSI ${seq} EL`, `EL ${m0}: erase ${['from the cursor to the end of the line', 'from the start of the line to the cursor', 'the whole line'][m0] || '?'}`];
+      }
+      case 'P': { const k = n(0, 1), row = this.grid[this.y]; row.splice(this.cx(), k); while (row.length < this.cols) row.push({c: ' ', a: DEF}); return [`CSI ${seq} DCH`, `DCH: delete ${k} character(s) and shift the rest left`]; }
+      case '@': { const k = n(0, 1), row = this.grid[this.y]; for (let i = 0; i < k; i++) row.splice(this.cx(), 0, {c: ' ', a: DEF}); row.length = this.cols; return [`CSI ${seq} ICH`, `ICH: insert ${k} blank(s)`]; }
+      case 'X': { const k = n(0, 1); er(this.y, this.cx(), Math.min(this.cols, this.cx() + k)); return [`CSI ${seq} ECH`, `ECH: erase ${k} character(s)`]; }
+      case 'm': return [`CSI ${seq} SGR`, 'SGR: ' + this.sgr(ps)];
+      default: return [`CSI ${seq}`, `CSI with final "${f}": not modelled here`];
+    }
+  }
+  sgr(ps) {
+    if (!ps.length) ps = [0];
+    const a = {...this.a}, out = [];
+    for (let i = 0; i < ps.length; i++) {
+      const v = ps[i] ?? 0;
+      if (v === 0) { Object.assign(a, DEF); out.push('reset all attributes'); }
+      else if (v === 1) { a.b = 1; out.push('bold'); } else if (v === 2) { a.d = 1; out.push('dim'); }
+      else if (v === 3) { a.i = 1; out.push('italic'); } else if (v === 4) { a.u = 1; out.push('underline'); }
+      else if (v === 7) { a.v = 1; out.push('inverse'); }
+      else if (v === 22) { a.b = 0; a.d = 0; out.push('normal intensity'); } else if (v === 23) { a.i = 0; out.push('no italic'); }
+      else if (v === 24) { a.u = 0; out.push('no underline'); } else if (v === 27) { a.v = 0; out.push('no inverse'); }
+      else if (v >= 30 && v <= 37) { a.fg = v - 30; out.push('fg ' + CN[v - 30]); } else if (v === 39) { a.fg = null; out.push('default fg'); }
+      else if (v >= 40 && v <= 47) { a.bg = v - 40; out.push('bg ' + CN[v - 40]); } else if (v === 49) { a.bg = null; out.push('default bg'); }
+      else if (v >= 90 && v <= 97) { a.fg = v - 82; out.push('fg bright ' + CN[v - 90]); } else if (v >= 100 && v <= 107) { a.bg = v - 92; out.push('bg bright ' + CN[v - 100]); }
+      else if (v === 38 || v === 48) {
+        const k = v === 38 ? 'fg' : 'bg';
+        if (ps[i + 1] === 5) { a[k] = ps[i + 2] ?? 0; out.push(`${k} 256-color #${a[k]}`); i += 2; }
+        else if (ps[i + 1] === 2) { const [r, g, bb] = [ps[i + 2] ?? 0, ps[i + 3] ?? 0, ps[i + 4] ?? 0]; a[k] = `rgb(${r},${g},${bb})`; out.push(`${k} truecolor rgb(${r},${g},${bb})`); i += 4; }
+      } else out.push(`${v} (ignored)`);
+    }
+    this.a = a; return out.join(', ');
+  }
+}
+function renderVT(vt, showCur) {
+  let h = ''; const cx = vt.cx(), cy = vt.y;
+  for (let y = 0; y < vt.rows; y++) {
+    let run = '', ra = null;
+    const fl = () => { if (run) { const s = cssA(ra); h += s ? `<span style="${s}">${eh(run)}</span>` : eh(run); } run = ''; };
+    const row = vt.grid[y];
+    for (let x = 0; x < vt.cols; x++) {
+      const c = row[x];
+      if (showCur && vt.curVis && y === cy && x === cx) { fl(); h += `<span class="cur" style="${cssA(c.a)}">${eh(c.c)}</span>`; ra = null; continue; }
+      if (c.a !== ra) { fl(); ra = c.a; }
+      run += c.c;
+    }
+    fl(); if (y < vt.rows - 1) h += '\n';
+  }
+  return h;
+}
+
+/* ---------- simulator state ---------- */
+const COLS = 56, ROWS = 14;
+const PROMPT = '\x1b[36m~\x1b[0m $ ';
+const COOKED = {ICANON: true, ECHO: true, ISIG: true, ICRNL: true, ONLCR: true};
+const FLAGS = [
+  ['ICANON', 'c_lflag'], ['ECHO', 'c_lflag'], ['ISIG', 'c_lflag'], ['ICRNL', 'c_iflag'], ['ONLCR', 'c_oflag'],
+];
+const PID = {bash: 4120, cat: 4207};
+const S = {
+  platform: 'linux', speed: reduce ? 'instant' : 'normal',
+  T: {...COOKED}, saved: null, fg: 'bash', line: [],
+  rl: {buf: '', pos: 0, hist: ['echo hello', 'ls'], hi: 2, cur: ''},
+  job: null, lastOut: [], nextPid: 4210,
+};
+const PLAT = {
+  linux: {
+    pts: '/dev/pts/3', ld: 'n_tty', pty: 'pty',
+    names: {ws: 'Compositor + xkbcommon'},
+    sub: {
+      kbd: 'Turns physical key presses into numbered key codes (USB HID usage IDs) and reports them to the computer. It knows nothing about letters or layouts.',
+      kin: 'A kernel driver receives the USB report and publishes a generic "key 30 went down" event (evdev) that any program can read.',
+      ws: 'The compositor decides which window has focus and passes the key to it. The app then applies your keyboard layout (xkbcommon) to work out which character it is.',
+      term: 'The app you look at. It turns key events into bytes for the program, and turns the program\'s output bytes back into coloured text on a grid.',
+      ptm: 'A PTY (pseudoterminal) is a fake serial cable the kernel makes, with two ends. The emulator holds this end: writing to it is typing, reading from it gets what the program printed.',
+      ldisc: 'Kernel code in the middle of the cable. It can echo what you type, collect it into lines, handle Backspace and turn Ctrl+C into a signal. Programs switch these features on and off through termios settings.',
+      pts: 'The other end of the cable (/dev/pts/3). The shell\'s stdin, stdout and stderr all point here, so to the shell it looks like a real terminal.',
+      proc: 'The program currently allowed to use the terminal (the foreground process group). Usually your shell, or the command it is running.',
+    },
+  },
+  mac: {
+    pts: '/dev/ttys003', ld: 'tty', pty: 'pty',
+    names: {ws: 'WindowServer + AppKit'},
+    sub: {
+      kbd: 'Turns physical key presses into numbered key codes (USB HID usage IDs) and reports them to the computer. It knows nothing about letters or layouts.',
+      kin: 'A kernel driver (IOHIDFamily) receives the report and turns it into a generic key event.',
+      ws: 'WindowServer decides which app has focus. AppKit hands that app a keyDown event with the character your keyboard layout produces.',
+      term: 'The app you look at. It turns key events into bytes for the program, and turns the program\'s output bytes back into coloured text on a grid.',
+      ptm: 'A PTY (pseudoterminal) is a fake serial cable the kernel makes, with two ends. The emulator holds this end: writing to it is typing, reading from it gets what the program printed.',
+      ldisc: 'Kernel code in the middle of the cable. It can echo what you type, collect it into lines, handle Backspace and turn Ctrl+C into a signal. Programs switch these features on and off through termios settings.',
+      pts: 'The other end of the cable (/dev/ttys003). The shell\'s stdin, stdout and stderr all point here, so to the shell it looks like a real terminal.',
+      proc: 'The program currently allowed to use the terminal (the foreground process group). Usually your shell, or the command it is running.',
+    },
+  },
+};
+const P = () => PLAT[S.platform];
+const LAYERS = [
+  {id: 'kbd', name: 'Keyboard', band: 'hardware'},
+  {id: 'kin', name: 'Input driver', band: 'kernel'},
+  {id: 'ws', name: '', band: 'user space'},
+  {id: 'term', name: 'Terminal emulator', band: 'user space', more: [['#bytes', 'Key encoding'], ['#parse', 'output parsing'], ['#render', 'rendering']]},
+  {id: 'ptm', name: 'PTY master', band: 'kernel', more: [['#pty', 'The PTY pair']]},
+  {id: 'ldisc', name: 'Line discipline', band: 'kernel', more: [['#ldisc', 'The line discipline']]},
+  {id: 'pts', name: 'PTY slave', band: 'kernel', more: [['#pty', 'The PTY pair']]},
+  {id: 'proc', name: 'bash · pid 4120', band: 'user space', more: [['#signals', 'Sessions and signals']]},
+];
+const CARDS = {};
+
+/* ---------- line discipline ---------- */
+function echoByte(out, b) {
+  if ((b < 0x20 && b !== 9 && b !== 10) || b === 0x7f) out.push(0x5e, b === 0x7f ? 0x3f : b + 0x40);
+  else out.push(b);
+}
+const SIGCH = {3: ['SIGINT', 'VINTR'], 0x1a: ['SIGTSTP', 'VSUSP'], 0x1c: ['SIGQUIT', 'VQUIT']};
+function ldiscIn(bytes) {
+  const T = S.T, R = {log: [], echo: [], deliver: [], ready: false, signal: null, now: ''};
+  const nowp = [];
+  for (let b of bytes) {
+    if (T.ISIG && SIGCH[b]) {
+      const [sig, cc] = SIGCH[b];
+      R.signal = sig;
+      R.log.push(`ISIG: ${caret(b)} matches ${cc} → kill(-${PID[S.fg]}, ${sig}) to the foreground process group`);
+      if (S.line.length) { R.log.push(`flush ${S.line.length} unread byte(s) from the line buffer`); S.line = []; }
+      if (T.ECHO) { R.echo.push(0x5e, b + 0x40); R.log.push(`ECHO: echo "${caret(b)}"`); }
+      nowp.push(`${caret(b)} → ${sig}`);
+      break;
+    }
+    if (b === 0x0d && T.ICRNL) { b = 0x0a; R.log.push('ICRNL: map \\r (0x0d) to \\n (0x0a)'); nowp.push('ICRNL \\r→\\n'); }
+    if (T.ICANON) {
+      if (b === 0x7f) {
+        if (S.line.length) {
+          let x; do { x = S.line.pop(); } while (S.line.length && (x & 0xc0) === 0x80);
+          if (T.ECHO) R.echo.push(8, 0x20, 8);
+          R.log.push(`ICANON: VERASE (^?) deletes the last character in the line buffer${T.ECHO ? '; ECHOE echoes "\\b \\b" to rub it out' : ''}`);
+        } else R.log.push('ICANON: VERASE on an empty line, nothing to erase');
+        nowp.push('VERASE'); continue;
+      }
+      if (b === 0x15) {
+        const n = dec.decode(new Uint8Array(S.line)).length; S.line = [];
+        if (T.ECHO) for (let i = 0; i < n; i++) R.echo.push(8, 0x20, 8);
+        R.log.push(`ICANON: VKILL (^U) erases the whole line (${n} chars)`); nowp.push('VKILL'); continue;
+      }
+      if (b === 0x04) {
+        R.ready = true; R.deliver = S.line; S.line = [];
+        R.log.push(R.deliver.length ? `ICANON: VEOF (^D) hands ${R.deliver.length} buffered byte(s) to read() without a newline` : 'ICANON: VEOF (^D) on an empty line → read() returns 0, which the reader treats as end of file');
+        nowp.push('VEOF'); continue;
+      }
+      if (b === 0x0a) {
+        S.line.push(b); if (T.ECHO) R.echo.push(0x0a);
+        R.ready = true; R.deliver = S.line; S.line = [];
+        R.log.push(`ICANON: \\n ends the line → ${R.deliver.length} byte(s) readable, wake the reader`);
+        nowp.push('line complete'); continue;
+      }
+      S.line.push(b); if (T.ECHO) echoByte(R.echo, b);
+      R.log.push(`ICANON: append ${b >= 0x20 && b < 0x7f ? `"${String.fromCharCode(b)}"` : '0x' + hex2(b)} → line buffer "${escBytes(S.line)}"`);
+    } else {
+      R.deliver.push(b); R.ready = true; if (T.ECHO) echoByte(R.echo, b);
+    }
+  }
+  if (!T.ICANON && R.deliver.length) R.log.push(`-ICANON: ${R.deliver.length} byte(s) readable immediately (VMIN=1, VTIME=0)`);
+  if (!R.signal) {
+    if (T.ECHO && R.echo.length) R.log.push(`ECHO: the kernel writes "${escBytes(R.echo)}" back toward the master`);
+    else if (!T.ECHO) R.log.push('-ECHO: nothing echoed; the application decides what appears');
+  }
+  R.now = nowp.length ? nowp.join(' · ') : '';
+  if (T.ICANON && !R.signal && !R.ready) R.now = (R.now ? R.now + ' · ' : '') + `line "${trunc(escBytes(S.line), 24)}"`;
+  if (!T.ICANON && !R.signal) R.now = (R.now ? R.now + ' · ' : '') + 'raw: pass through';
+  R.pkt = R.signal || lbl(R.deliver.length ? R.deliver : bytes);
+  return R;
+}
+function opost(bytes) {
+  if (!S.T.ONLCR) return {out: bytes, log: bytes.includes(10) ? ['-ONLCR: \\n passes through with no carriage return'] : [], changed: false};
+  const out = []; let ch = false;
+  for (const b of bytes) { if (b === 10) { out.push(13, 10); ch = true; } else out.push(b); }
+  return {out, log: ch ? ['OPOST|ONLCR: \\n → \\r\\n'] : [], changed: ch};
+}
+
+/* ---------- processes ---------- */
+function rlPrep() {
+  S.saved = {...S.T}; S.T.ICANON = false; S.T.ECHO = false; S.T.ICRNL = false;
+  return 'tcsetattr(0, TCSADRAIN, -icanon -echo -icrnl): readline takes over editing and echo';
+}
+function rlDeprep() {
+  if (S.saved) { S.T = {...S.saved}; S.saved = null; }
+  return 'tcsetattr(0, TCSADRAIN, saved): restore cooked mode before running the command';
+}
+function sttyText() {
+  const f = n => S.T[n.toUpperCase()] ? n : '-' + n;
+  return `speed 38400 baud; rows ${ROWS}; columns ${COLS};\nlflags: ${f('icanon')} ${f('isig')} ${f('echo')} echoe echoctl\niflags: ${f('icrnl')} ixon\noflags: opost ${f('onlcr')}\ncchars: intr=^C eof=^D erase=^? kill=^U susp=^Z\n`;
+}
+const COMMANDS = ['cat', 'clear', 'echo', 'exit', 'fg', 'help', 'jobs', 'ls', 'pwd', 'stty', 'tty'];
+function runCmd(line) {
+  const [c, ...a] = line.trim().split(/\s+/);
+  const ext = (name, out) => {
+    const pid = S.nextPid++;
+    return {w: [{proc: name, pid, out, log: [['bash', `fork() = ${pid}; setpgid(${pid}, ${pid}); tcsetpgrp(0, ${pid}); execve("/bin/${name}")`]], now: `${name} writes output`}], ext: pid};
+  };
+  const built = (out, what) => ({w: [{proc: 'bash', out, log: [['bash', what]], now: what}]});
+  switch (c) {
+    case undefined: case '': return {w: []};
+    case 'echo': return built(a.join(' ') + '\n', 'builtin echo');
+    case 'pwd': return built('/home/dev\n', 'builtin pwd');
+    case 'help': return built('commands: cat echo ls stty tty clear jobs fg exit\nkeys: ↑↓ history  ←→  Tab  Ctrl+A E K U W L C D Z\n', 'builtin help');
+    case 'jobs': return built(S.job ? '[1]+  Stopped                 cat\n' : '', 'builtin jobs');
+    case 'ls': return ext('ls', '\x1b[1;34mbin\x1b[0m  \x1b[1;34msrc\x1b[0m  \x1b[1;32mbuild.sh\x1b[0m  notes.txt  Makefile\n');
+    case 'tty': return ext('tty', P().pts + '\n');
+    case 'stty': return ext('stty', sttyText());
+    case 'clear': return ext('clear', '\x1b[H\x1b[2J');
+    case 'cat':
+      if (a.length) return ext('cat', a[0] === 'notes.txt' ? 'In cooked mode the kernel echoes. In raw mode the app does.\n' : `cat: ${a[0]}: No such file or directory\n`);
+      S.fg = 'cat';
+      return {cat: true, w: [{proc: 'cat', out: '', log: [['bash', 'fork() = 4207; setpgid(4207, 4207); tcsetpgrp(0, 4207): cat becomes the foreground group'], ['cat', 'execve("/bin/cat"); read(0, …) blocks until the line discipline has a line']], now: 'blocked in read(0)'}]};
+    case 'fg':
+      if (S.job) { S.fg = 'cat'; S.job = null; return {cat: true, w: [{proc: 'bash', out: 'cat\n', log: [['bash', 'tcsetpgrp(0, 4207); kill(-4207, SIGCONT)']], now: 'resume job 1'}]}; }
+      return built('bash: fg: current: no such job\n', 'builtin fg');
+    case 'exit': return {exit: true, w: []};
+    default: return built(`bash: ${c}: command not found\n`, 'PATH lookup failed');
+  }
+}
+function exitWrites(pre) {
+  const w = [{proc: 'bash', out: pre + 'exit\n', log: [['bash', 'exit(0): the last process holding the slave open is gone']], now: 'exit(0)'}];
+  S.T = {...COOKED}; S.saved = null; S.fg = 'bash'; S.job = null; S.line = [];
+  S.rl = {buf: '', pos: 0, hist: S.rl.hist, hi: S.rl.hist.length, cur: ''};
+  const pl = rlPrep();
+  w.push({special: 'eio'});
+  w.push({proc: 'bash', out: PROMPT, log: [['term', 'spawn a new shell: posix_openpt, fork, setsid, open slave, execve bash'], ['bash', pl]], now: 'new shell'});
+  return w;
+}
+function bashIn(bytes) {
+  const rl = S.rl, s = dec.decode(new Uint8Array(bytes));
+  let out = ''; const acts = [];
+  const tailBack = () => rl.buf.length - rl.pos ? `\x1b[${rl.buf.length - rl.pos}D` : '';
+  const redraw = () => '\r' + PROMPT + rl.buf + '\x1b[K' + tailBack();
+  if (s.length > 1 && s[0] === '\x1b') {
+    const op = {'\x1b[A': 'up', '\x1bOA': 'up', '\x1b[B': 'down', '\x1bOB': 'down', '\x1b[C': 'right', '\x1bOC': 'right', '\x1b[D': 'left', '\x1bOD': 'left', '\x1b[H': 'home', '\x1b[F': 'end', '\x1b[3~': 'del'}[s];
+    if (op === 'up') {
+      if (rl.hi > 0) { if (rl.hi === rl.hist.length) rl.cur = rl.buf; rl.hi--; rl.buf = rl.hist[rl.hi]; rl.pos = rl.buf.length; out += redraw(); acts.push('previous-history: redraw the line'); }
+      else { out += '\x07'; acts.push('no older history: ring the bell'); }
+    } else if (op === 'down') {
+      if (rl.hi < rl.hist.length) { rl.hi++; rl.buf = rl.hi === rl.hist.length ? rl.cur : rl.hist[rl.hi]; rl.pos = rl.buf.length; out += redraw(); acts.push('next-history: redraw the line'); }
+      else { out += '\x07'; acts.push('no newer history: ring the bell'); }
+    } else if (op === 'left') { if (rl.pos > 0) { rl.pos--; out += '\b'; } acts.push('backward-char: write \\b'); }
+    else if (op === 'right') { if (rl.pos < rl.buf.length) { out += rl.buf[rl.pos]; rl.pos++; } acts.push('forward-char: rewrite the character under the cursor'); }
+    else if (op === 'home') { out += rl.pos ? `\x1b[${rl.pos}D` : ''; rl.pos = 0; acts.push('beginning-of-line'); }
+    else if (op === 'end') { out += rl.buf.slice(rl.pos); rl.pos = rl.buf.length; acts.push('end-of-line'); }
+    else if (op === 'del') { if (rl.pos < rl.buf.length) { rl.buf = rl.buf.slice(0, rl.pos) + rl.buf.slice(rl.pos + 1); out += '\x1b[P'; } acts.push('delete-char: CSI P deletes the cell on screen'); }
+    else { out += '\x07'; acts.push(`unbound sequence "${escBytes(bytes)}": ring the bell`); }
+    return [{proc: 'bash', out, log: acts.map(t => ['readline', t]), now: acts[0]}];
+  }
+  for (const ch of s) {
+    const c = ch.codePointAt(0);
+    if (c === 13 || c === 10) {
+      out += '\n';
+      const cmd = rl.buf; rl.buf = ''; rl.pos = 0;
+      if (cmd.trim()) rl.hist.push(cmd); rl.hi = rl.hist.length; rl.cur = '';
+      const log = [['readline', `accept-line ${c === 13 ? '(\\r: readline cleared ICRNL, so it sees the raw CR)' : ''} → "${cmd}"`], ['bash', rlDeprep()]];
+      const r = runCmd(cmd);
+      if (r.exit) return exitWrites(out).map((w, i) => i === 0 ? {...w, log: [...log, ...w.log]} : w);
+      const writes = [{proc: 'bash', out, log, now: `run "${trunc(cmd, 18)}"`}, ...r.w];
+      if (!r.cat) {
+        const pl = rlPrep();
+        writes.push({proc: 'bash', out: PROMPT, log: [...(r.ext ? [['bash', `waitpid(${r.ext}) → exited 0; tcsetpgrp(0, 4120)`]] : []), ['bash', pl]], now: 'print prompt'});
+      }
+      return writes;
+    }
+    if (c === 0x7f || c === 8) {
+      if (rl.pos > 0) { const tail = rl.buf.slice(rl.pos); rl.buf = rl.buf.slice(0, rl.pos - 1) + tail; rl.pos--; out += '\b' + tail + ' ' + '\b'.repeat(tail.length + 1); acts.push('backward-delete-char: write "\\b \\b"'); }
+      else { out += '\x07'; acts.push('nothing to delete: ring the bell'); }
+    } else if (c === 1) { out += rl.pos ? `\x1b[${rl.pos}D` : ''; rl.pos = 0; acts.push('beginning-of-line (Ctrl+A)'); }
+    else if (c === 5) { out += rl.buf.slice(rl.pos); rl.pos = rl.buf.length; acts.push('end-of-line (Ctrl+E)'); }
+    else if (c === 2) { if (rl.pos > 0) { rl.pos--; out += '\b'; } acts.push('backward-char (Ctrl+B)'); }
+    else if (c === 6) { if (rl.pos < rl.buf.length) { out += rl.buf[rl.pos]; rl.pos++; } acts.push('forward-char (Ctrl+F)'); }
+    else if (c === 0x0b) { rl.buf = rl.buf.slice(0, rl.pos); out += '\x1b[K'; acts.push('kill-line (Ctrl+K): CSI K erases to end of line'); }
+    else if (c === 0x15) { rl.buf = rl.buf.slice(rl.pos); rl.pos = 0; out += redraw(); acts.push('unix-line-discard (Ctrl+U): redraw'); }
+    else if (c === 0x17) { let i = rl.pos; while (i > 0 && rl.buf[i - 1] === ' ') i--; while (i > 0 && rl.buf[i - 1] !== ' ') i--; rl.buf = rl.buf.slice(0, i) + rl.buf.slice(rl.pos); rl.pos = i; out += redraw(); acts.push('unix-word-rubout (Ctrl+W): redraw'); }
+    else if (c === 0x0c) { out += '\x1b[H\x1b[2J' + PROMPT + rl.buf + tailBack(); acts.push('clear-screen (Ctrl+L): CSI H, CSI 2J, redraw prompt'); }
+    else if (c === 9) {
+      const word = rl.buf.slice(0, rl.pos);
+      const m = word.includes(' ') ? [] : COMMANDS.filter(x => x.startsWith(word));
+      if (m.length === 1) { const add = m[0].slice(word.length) + ' '; rl.buf = rl.buf.slice(0, rl.pos) + add + rl.buf.slice(rl.pos); rl.pos += add.length; out += add + rl.buf.slice(rl.pos) + tailBack(); acts.push(`complete: unique match "${m[0]}"`); }
+      else if (m.length > 1 && word) { out += '\n' + m.join('  ') + '\n' + PROMPT + rl.buf + tailBack(); acts.push(`complete: ${m.length} matches, list them`); }
+      else { out += '\x07'; acts.push('complete: no single match, ring the bell'); }
+    } else if (c === 4) {
+      if (!rl.buf.length) return exitWrites(out).map((w, i) => i === 0 ? {...w, log: [['readline', 'Ctrl+D on an empty line: end of input'], ...w.log]} : w);
+      if (rl.pos < rl.buf.length) { rl.buf = rl.buf.slice(0, rl.pos) + rl.buf.slice(rl.pos + 1); out += '\x1b[P'; }
+      acts.push('delete-char (Ctrl+D)');
+    } else if (c < 0x20) { out += '\x07'; acts.push(`unbound ${caret(c)}: ring the bell`); }
+    else {
+      const tail = rl.buf.slice(rl.pos);
+      rl.buf = rl.buf.slice(0, rl.pos) + ch + tail; rl.pos++;
+      out += ch + tail + (tail.length ? `\x1b[${tail.length}D` : '');
+      acts.push(tail.length ? `self-insert "${ch}" mid-line: rewrite the tail and move back` : `self-insert "${ch}": echo it`);
+    }
+  }
+  return [{proc: 'bash', out, log: acts.map(t => ['readline', t]), now: acts[0] || ''}];
+}
+function catIn(bytes) {
+  if (!bytes.length) {
+    S.fg = 'bash'; const pl = rlPrep();
+    return [{proc: 'cat', out: '', log: [['cat', 'read() returned 0 → end of file → exit(0)']], now: 'EOF, exit(0)'},
+      {proc: 'bash', out: PROMPT, log: [['bash', 'waitpid(4207) → exited 0'], ['bash', 'tcsetpgrp(0, 4120): the shell takes the foreground back'], ['bash', pl]], now: 'print prompt'}];
+  }
+  return [{proc: 'cat', out: bytes, log: [], now: 'copy stdin to stdout'}];
+}
+function sigReact(sig) {
+  if (S.fg === 'bash') {
+    if (sig === 'SIGINT') {
+      S.rl.buf = ''; S.rl.pos = 0; S.rl.hi = S.rl.hist.length;
+      return [{proc: 'bash', out: '^C\n' + PROMPT, log: [['bash', 'SIGINT handler: readline throws away the line, prints ^C itself (ECHO is off) and a new prompt']], now: 'discard line'}];
+    }
+    return [{proc: 'bash', out: '', log: [['bash', `an interactive bash ignores ${sig}`]], now: `${sig} ignored`}];
+  }
+  if (sig === 'SIGTSTP') {
+    S.job = 'cat'; S.fg = 'bash'; const pl = rlPrep();
+    return [{proc: 'cat', out: '', log: [['cat', 'default action for SIGTSTP: stop the process']], now: 'stopped'},
+      {proc: 'bash', out: '\n[1]+  Stopped                 cat\n' + PROMPT, log: [['bash', 'waitpid(-1, WUNTRACED) → 4207 stopped'], ['bash', 'tcsetpgrp(0, 4120): the shell takes the foreground back'], ['bash', pl]], now: 'job 1 stopped'}];
+  }
+  S.fg = 'bash'; const pl = rlPrep();
+  return [{proc: 'cat', out: '', log: [['cat', `default action for ${sig}: terminate`]], now: 'killed'},
+    {proc: 'bash', out: (sig === 'SIGQUIT' ? 'Quit\n' : '\n') + PROMPT, log: [['bash', `waitpid(4207) → killed by ${sig}`], ['bash', 'tcsetpgrp(0, 4120)'], ['bash', pl]], now: 'print prompt'}];
+}
+
+/* ---------- trace construction ---------- */
+function inputStops(k, bytes) {
+  const info = KEYS[k.code] || {}, linux = S.platform === 'linux';
+  const mods = (k.ctrl ? 1 : 0) | (k.shift ? 2 : 0) | (k.alt ? 4 : 0);
+  const modN = [k.ctrl && 'LCtrl', k.shift && 'LShift', k.alt && 'LAlt'].filter(Boolean).join('+');
+  const hid = info.hid != null ? '0x' + hex2(info.hid) : 'n/a';
+  const label = keyLabel(k), text = k.ch && !k.ctrl ? k.ch : '';
+  const ev = info.ev ?? '?', sym = symName(k);
+  const stops = [{layer: 'kbd', pkt: hid, now: `report ${hex2(mods)} 00 ${info.hid != null ? hex2(info.hid) : '??'} 00 00 00 00 00`,
+    log: [['hid', `interrupt IN report: modifiers=0x${hex2(mods)}${modN ? ' (' + modN + ')' : ''}, key[0]=${hid}`]]}];
+  if (linux) {
+    stops.push({layer: 'kin', pkt: `KEY ${ev}`, now: `EV_KEY ${info.evName || '?'} (${ev}) value=1`,
+      log: [['evdev', `/dev/input/event3: EV_KEY ${info.evName || '?'} (${ev}) value=1, then EV_SYN SYN_REPORT`]]});
+    const xk = info.ev != null ? info.ev + 8 : '?';
+    stops.push({layer: 'ws', pkt: sym, now: `xkb keycode ${xk} → XKB_KEY_${sym}${text ? ` "${text}"` : ''}`,
+      log: [['libinput', `keyboard key ${ev} pressed`], ['wayland', `wl_keyboard.key(serial, time, key=${ev}, pressed) → focused surface`], ['xkb', `keycode ${xk} (evdev + 8) → XKB_KEY_${sym}${text ? `, utf8 "${text}"` : ''}`]]});
+  } else {
+    stops.push({layer: 'kin', pkt: `usage ${hid}`, now: `HID event · page 0x07 usage ${hid}`,
+      log: [['IOHID', `keyboard event usagePage=0x07 usage=${hid} down=1`]]});
+    const raw = encodeLegacy({...k, alt: false}) || [];
+    const ns = info.ns || escBytes(raw);
+    const flags = [k.ctrl && 'Control', k.shift && 'Shift', k.alt && 'Option'].filter(Boolean).join('|') || '0';
+    stops.push({layer: 'ws', pkt: `kc ${info.mac ?? '?'}`, now: `NSEvent keyDown keyCode=${info.mac ?? '?'} chars="${ns}"`,
+      log: [['WindowSrv', 'route to the key window of the frontmost app'], ['AppKit', `keyDown: keyCode=${info.mac ?? '?'} characters="${ns}" modifierFlags=${flags}`]]});
+  }
+  const e = escBytes(bytes);
+  stops.push({layer: 'term', pkt: hexs(bytes), now: `${label} → "${e}"`, log: [['term', `encode ${label} → ${hexs(bytes)}`], ['term', `write(ptmx, "${e}", ${bytes.length}) = ${bytes.length}`]]});
+  stops.push({layer: 'ptm', pkt: hexs(bytes), now: `${bytes.length} byte(s) → slave input path`, log: [[P().pty, `master write delivers ${bytes.length} byte(s) to the line discipline's receive path`]]});
+  return stops;
+}
+function vtStops(o) {
+  return [
+    {layer: 'ptm', pkt: lbl(o.out), now: `${o.out.length} byte(s) readable on master`, log: [[P().pty, 'master fd becomes readable (POLLIN)']]},
+    {layer: 'term', pkt: lbl(o.out), now: '', log: [['term', `read(ptmx, buf, 65536) = ${o.out.length} "${escBytes(o.out)}"`]], effect: () => feedMain(o.out)},
+  ];
+}
+function echoSeg(echo) {
+  const o = opost(echo);
+  return {lane: 'out', stops: [{layer: 'ldisc', pkt: lbl(o.out), now: `echo "${trunc(escBytes(o.out), 20)}"`, log: o.log.map(t => [P().ld, t])}, ...vtStops(o)]};
+}
+function writeSegs(writes) {
+  const segs = [];
+  for (const w of writes) {
+    if (w.special === 'eio') {
+      segs.push({lane: 'out', stops: [{layer: 'term', pkt: 'EIO', now: 'read(ptmx) = -1 EIO', log: [['term', 'read(ptmx) = -1 EIO: nothing holds the slave open any more']],
+        effect: () => { feedMain(toBytes('\x1b[2m[process exited, starting a new shell]\x1b[0m\r\n'), true); return 'show exit notice'; }}]});
+      continue;
+    }
+    const bytes = toBytes(w.out), pid = w.pid || PID[w.proc] || 4120;
+    const procStop = {layer: 'proc', procName: `${w.proc} · pid ${pid}`, pkt: lbl(bytes), now: w.now || '', log: [...w.log]};
+    if (!bytes.length) { segs.push({lane: 'out', nopkt: true, stops: [procStop]}); continue; }
+    procStop.log.push([w.proc, `write(1, "${trunc(escBytes(bytes), 60)}", ${bytes.length}) = ${bytes.length}`]);
+    const o = opost(bytes);
+    segs.push({lane: 'out', stops: [procStop,
+      {layer: 'pts', pkt: lbl(bytes), now: `write() on ${P().pts}`, log: [[P().pty, `slave write → output processing (${bytes.length} B)`]]},
+      {layer: 'ldisc', pkt: lbl(o.out), now: o.changed ? 'OPOST|ONLCR: \\n → \\r\\n' : S.T.ONLCR ? 'OPOST: no change' : '-ONLCR: \\n left alone', log: o.log.map(t => [P().ld, t])},
+      ...vtStops(o)]});
+  }
+  return segs;
+}
+function deliverSegs(bytes) {
+  const who = S.fg, pid = PID[who];
+  const seg = {lane: 'in', stops: [
+    {layer: 'ldisc', pkt: lbl(bytes), now: null, log: []},
+    {layer: 'pts', pkt: lbl(bytes), now: `read(0) returns ${bytes.length}`, log: [[P().pty, `${who} (pid ${pid}) was blocked in read() on ${P().pts}; woken`]]},
+    {layer: 'proc', procName: `${who} · pid ${pid}`, pkt: lbl(bytes), now: `read(0, buf, 4096) = ${bytes.length}`, log: [[who, `read(0, "${escBytes(bytes)}", 4096) = ${bytes.length}`]]},
+  ]};
+  return [seg, ...writeSegs(who === 'bash' ? bashIn(bytes) : catIn(bytes))];
+}
+function signalSegs(sig) {
+  const who = S.fg, pid = PID[who];
+  const seg = {lane: 'sig', stops: [
+    {layer: 'ldisc', pkt: sig, now: null, log: []},
+    {layer: 'proc', procName: `${who} · pid ${pid}`, pkt: sig, now: `${sig} delivered`, log: [['kernel', `${sig} queued for pgrp ${pid}; the process runs its handler or default action`]]},
+  ]};
+  return [seg, ...writeSegs(sigReact(sig))];
+}
+function handleKey(k) {
+  const bytes = encodeLegacy(k);
+  if (!bytes || !bytes.length) return;
+  const label = keyLabel(k);
+  const inSeg = {lane: 'in', stops: inputStops(k, bytes)};
+  const L = ldiscIn(bytes);
+  inSeg.stops.push({layer: 'ldisc', pkt: L.pkt, now: L.now, log: L.log.map(t => [P().ld, t])});
+  const tr = {label, segs: [inSeg]};
+  if (L.echo.length) tr.segs.push(echoSeg(L.echo));
+  if (L.signal) tr.segs.push(...signalSegs(L.signal));
+  else if (L.ready) tr.segs.push(...deliverSegs(L.deliver));
+  enqueue(tr);
+}
+
+/* ---------- playback ---------- */
+const stackEl = $('#stack'), logEl = $('#log');
+let queue = [], running = false;
+function enqueue(tr) { queue.push(tr); if (!running) runQueue(); }
+async function runQueue() {
+  running = true;
+  while (queue.length) { const tr = queue.shift(); await playTrace(tr, queue.length > 0); }
+  running = false;
+}
+async function playTrace(tr, hurry) {
+  logSep(tr.label);
+  for (const seg of tr.segs) await playSeg(seg, hurry || queue.length > 0);
+}
+function lanePos(lane, layer) {
+  const row = CARDS[layer].row, w = stackEl.clientWidth, lw = CARDS[layer].laneW;
+  return {x: lane === 'out' ? w - lw / 2 : lw / 2, y: row.offsetTop + row.offsetHeight / 2};
+}
+async function playSeg(seg, hurry) {
+  const dur = S.speed === 'instant' ? 0 : hurry ? 60 : S.speed === 'slow' ? 700 : 280;
+  let pkt = null;
+  if (dur && !seg.nopkt && seg.stops.length > 1) {
+    pkt = document.createElement('div');
+    pkt.className = 'pkt ' + (seg.lane === 'in' ? '' : seg.lane);
+    stackEl.appendChild(pkt);
+  }
+  for (let i = 0; i < seg.stops.length; i++) {
+    const st = seg.stops[i], pos = lanePos(seg.lane, st.layer);
+    if (pkt) {
+      if (i === 0) { pkt.style.transform = `translate(${pos.x}px,${pos.y}px)`; pkt.textContent = st.pkt; }
+      else {
+        const from = pkt.style.transform, to = `translate(${pos.x}px,${pos.y}px)`;
+        await pkt.animate([{transform: from}, {transform: to}], {duration: dur, easing: 'cubic-bezier(.45,0,.25,1)'}).finished;
+        pkt.style.transform = to; pkt.textContent = st.pkt;
+      }
+    }
+    arrive(st, seg.lane);
+    if (dur) await wait(dur * (i === seg.stops.length - 1 ? .5 : .3));
+  }
+  if (pkt) { const p = pkt; p.animate([{opacity: 1}, {opacity: 0}], {duration: 200}).finished.then(() => p.remove()); }
+}
+function hit(el, kind) { el.classList.remove('hit-in', 'hit-out', 'hit-sig'); void el.offsetWidth; el.classList.add('hit-' + kind); }
+function arrive(st, lane) {
+  const c = CARDS[st.layer];
+  if (st.procName) c.nm.textContent = st.procName;
+  if (st.now) c.now.textContent = st.now;
+  hit(c.el, lane);
+  for (const [t, txt] of st.log || []) logLine(t, txt, lane);
+  if (st.effect) { const r = st.effect(); if (r) { c.now.textContent = r; logLine('vt', r, lane); } }
+  syncUI();
+}
+let logCount = 0;
+function trimLog() { while (logEl.childElementCount > 500) logEl.firstElementChild.remove(); }
+function logLine(tag, text, lane) {
+  const d = document.createElement('div'); d.className = 'ln';
+  d.innerHTML = `<span class="tg ${lane === 'in' ? '' : lane}">${eh(tag)}</span><span>${eh(text)}</span>`;
+  logEl.appendChild(d); trimLog(); logEl.scrollTop = logEl.scrollHeight;
+}
+function logSep(label) {
+  const d = document.createElement('div'); d.className = 'sep';
+  d.textContent = `── key ${++logCount}: ${label}`;
+  logEl.appendChild(d); trimLog(); logEl.scrollTop = logEl.scrollHeight;
+}
+
+/* ---------- main screen ---------- */
+const vt = new VT(COLS, ROWS);
+const screen = $('#screen'), win = $('#win');
+vt.onBell = () => { win.classList.remove('bell'); void win.offsetWidth; win.classList.add('bell'); };
+vt.onTitle = t => { $('#wtitle').textContent = t || 'bash'; };
+let rq = false;
+function scheduleRender() { if (rq) return; rq = true; requestAnimationFrame(() => { rq = false; screen.innerHTML = renderVT(vt, true); }); }
+function feedMain(bytes, local) {
+  const acts = bytes.map(b => vt.feed(b));
+  if (!local) S.lastOut = bytes.slice();
+  scheduleRender();
+  const parts = []; let pr = '';
+  const fl = () => { if (pr) { parts.push(`print "${trunc(pr, 16)}"`); pr = ''; } };
+  for (const a of acts) {
+    if (a.act === 'print') pr += a.ch;
+    else if (a.short) { fl(); parts.push(a.short); }
+  }
+  fl();
+  return 'parse: ' + (parts.join(' · ') || 'no visible change');
+}
+function fitScreen() {
+  const w = win.clientWidth - 28;
+  const fs = Math.max(7, Math.min(15, w / (COLS * 0.6)));
+  screen.style.fontSize = fs + 'px';
+  screen.style.height = (ROWS * fs * 1.3 + 24) + 'px';
+}
+new ResizeObserver(fitScreen).observe(win);
+screen.addEventListener('focus', () => win.classList.add('focused'));
+screen.addEventListener('blur', () => win.classList.remove('focused'));
+function fromEvent(e) {
+  if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Dead', 'Unidentified', 'Process'].includes(e.key) || e.metaKey || e.isComposing) return null;
+  const k = {code: e.code, ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey, ch: null};
+  if ([...e.key].length === 1) k.ch = e.key;
+  const info = KEYS[e.code];
+  if (k.alt && info && info.base) k.ch = e.shiftKey && /[a-z]/.test(info.base) ? info.base.toUpperCase() : info.base;
+  if (k.ctrl && info && info.base && !(k.ch && /^[a-z]$/i.test(k.ch))) k.ch = info.base;
+  if (!info && !k.ch) return null;
+  return k;
+}
+screen.addEventListener('keydown', e => {
+  const k = fromEvent(e); if (!k) return;
+  e.preventDefault(); handleKey(k);
+});
+screen.addEventListener('paste', e => {
+  e.preventDefault();
+  const t = (e.clipboardData.getData('text') || '').slice(0, 80).replace(/\r?\n/g, '\r');
+  for (const ch of t) handleKey(charKey(ch));
+});
+
+/* ---------- stack ---------- */
+function buildStack() {
+  const outFrom = LAYERS.findIndex(l => l.id === 'term');
+  LAYERS.forEach((L, i) => {
+    const row = document.createElement('div'); row.className = 'lrow';
+    const li = document.createElement('div'); li.className = 'lane li' + (i === 0 ? ' first' : '') + (i === LAYERS.length - 1 ? ' last' : '');
+    const lo = document.createElement('div'); lo.className = 'lane lo' + (i < outFrom ? ' none' : '') + (i === outFrom ? ' first' : '') + (i === LAYERS.length - 1 ? ' last' : '');
+    const card = document.createElement('div'); card.className = 'card' + (L.band === 'kernel' ? ' k' : '');
+    card.innerHTML = `<div class="ct"><span class="nm"></span><span class="band">${L.band}</span></div><div class="sub"></div>${L.more ? `<div class="more">explained below: ${L.more.map(([h, t]) => `<a href="${h}">${t} ↓</a>`).join(' · ')}</div>` : ''}<div class="now" title="what this layer did with the last packet">·</div>`;
+    row.append(li, card, lo); stackEl.appendChild(row);
+    CARDS[L.id] = {el: card, row, nm: card.querySelector('.nm'), sub: card.querySelector('.sub'), now: card.querySelector('.now'), get laneW() { return li.offsetWidth; }};
+    CARDS[L.id].nm.textContent = L.name;
+  });
+  applyPlatform();
+}
+function applyPlatform() {
+  const p = P();
+  for (const L of LAYERS) CARDS[L.id].sub.textContent = p.sub[L.id];
+  CARDS.ws.nm.textContent = p.names.ws;
+  $('#wpts').textContent = p.pts;
+  for (const b of $('#plat').children) b.setAttribute('aria-pressed', b.dataset.v === S.platform);
+}
+
+/* ---------- controls ---------- */
+const chipsEl = $('#chips'), chipEls = {};
+FLAGS.forEach(([f, field]) => {
+  const b = document.createElement('button'); b.className = 'chip';
+  b.title = `${field}: toggle ${f.toLowerCase()}, as if you ran stty from another terminal`;
+  b.addEventListener('click', () => {
+    S.T[f] = !S.T[f];
+    if (S.fg === 'bash' && S.saved && (f === 'ONLCR' || f === 'ISIG')) S.saved[f] = S.T[f];
+    logSep('stty');
+    logLine('stty', `stty -F ${P().pts} ${S.T[f] ? '' : '-'}${f.toLowerCase()}${S.fg === 'bash' && S.saved && ['ICANON', 'ECHO', 'ICRNL'].includes(f) ? '  (readline will reset this at the next prompt)' : ''}`, 'in');
+    syncUI(); screen.focus();
+  });
+  chipEls[f] = {b, field}; chipsEl.appendChild(b);
+});
+function syncUI() {
+  for (const [f, {b, field}] of Object.entries(chipEls)) {
+    const on = S.T[f]; b.classList.toggle('off', !on);
+    b.innerHTML = `${on ? '' : '-'}${f.toLowerCase()}<span class="fld">${field.slice(2)}</span>`;
+    b.setAttribute('aria-pressed', on);
+  }
+  $('#fgname').textContent = `${S.fg} (pid ${PID[S.fg]})${S.job ? ' · job 1 stopped' : ''}`;
+}
+const KEYPAD = [
+  ['ls ⏎', 'ls\r'], ['cat ⏎', 'cat\r'], ['stty ⏎', 'stty\r'],
+  ['Enter', {code: 'Enter'}], ['⌫', {code: 'Backspace'}], ['Tab', {code: 'Tab'}], ['Esc', {code: 'Escape'}],
+  ['↑', {code: 'ArrowUp'}], ['←', {code: 'ArrowLeft'}], ['→', {code: 'ArrowRight'}],
+  ['Ctrl C', {code: 'KeyC', ch: 'c', ctrl: true}], ['Ctrl D', {code: 'KeyD', ch: 'd', ctrl: true}], ['Ctrl Z', {code: 'KeyZ', ch: 'z', ctrl: true}],
+  ['Ctrl L', {code: 'KeyL', ch: 'l', ctrl: true}], ['Ctrl U', {code: 'KeyU', ch: 'u', ctrl: true}], ['Ctrl J', {code: 'KeyJ', ch: 'j', ctrl: true}],
+];
+for (const [t, v] of KEYPAD) {
+  const b = document.createElement('button'); b.className = typeof v === 'string' ? 'btn' : 'key'; b.textContent = t;
+  b.addEventListener('click', () => { if (typeof v === 'string') for (const ch of v) handleKey(charKey(ch)); else handleKey(v); });
+  $('#keypad').appendChild(b);
+}
+function segCtl(el, key, cb) {
+  el.addEventListener('click', e => { const v = e.target.dataset.v; if (!v) return; S[key] = v; for (const b of el.children) b.setAttribute('aria-pressed', b.dataset.v === v); cb && cb(); });
+  for (const b of el.children) b.setAttribute('aria-pressed', b.dataset.v === S[key]);
+}
+segCtl($('#speed'), 'speed');
+segCtl($('#plat'), 'platform', applyPlatform);
+function resetSim(quiet) {
+  queue = [];
+  S.T = {...COOKED}; S.saved = null; S.fg = 'bash'; S.line = []; S.job = null;
+  S.rl = {buf: '', pos: 0, hist: ['echo hello', 'ls'], hi: 2, cur: ''};
+  vt.reset(); $('#wtitle').textContent = 'bash';
+  rlPrep();
+  if (!quiet) feedMain(toBytes('\x1b[2mSimulated bash on a real VT parser. Try ls, cat, stty,\r\nthe arrow keys, Tab, Ctrl+C.\x1b[0m\r\n'), true);
+  feedMain(toBytes(PROMPT), true);
+  CARDS.proc.nm.textContent = 'bash · pid 4120';
+  for (const L of LAYERS) CARDS[L.id].now.textContent = '·';
+  $('#hint').hidden = true;
+  syncUI();
+}
+$('#reset').addEventListener('click', () => { resetSim(); screen.focus(); });
+$('#clearlog').addEventListener('click', () => { logEl.innerHTML = ''; });
+
+/* ---------- experiments ---------- */
+const EXPS = [
+  {f: 'ICANON', field: 'c_lflag', what: 'Canonical mode. The kernel assembles a line and handles VERASE (^?), VKILL (^U) and VEOF (^D). With it off, read() returns as soon as VMIN bytes arrive.',
+    btn: 'Raw cat', set: {ICANON: false}, hint: 'cat now runs with -icanon. Each byte reaches cat at once and cat writes it back, while the kernel still echoes it. Every letter appears twice.'},
+  {f: 'ECHO', field: 'c_lflag', what: 'The kernel writes received input back toward the master. With ECHOCTL, control characters are shown as ^X.',
+    btn: 'Password prompt', set: {ECHO: false}, hint: 'This is what getpass() does: -echo. Type a word, nothing appears. Press Enter and cat prints the line once, because only cat\'s own write reaches the screen.'},
+  {f: 'ISIG', field: 'c_lflag', what: 'VINTR (^C), VSUSP (^Z) and VQUIT (^\\) generate SIGINT, SIGTSTP and SIGQUIT for the foreground process group.',
+    btn: 'Unkillable cat', set: {ISIG: false}, hint: 'ISIG is off. Ctrl+C is now an ordinary byte: it is echoed as ^C and buffered. Ctrl+D on an empty line still ends cat, because VEOF belongs to ICANON.'},
+  {f: 'ICRNL', field: 'c_iflag', what: 'Translates the \\r that the Enter key sends into the \\n that canonical mode treats as end of line.',
+    btn: 'Enter shows ^M', set: {ICRNL: false}, hint: 'With -icrnl, Enter\'s \\r is not a line terminator. The kernel echoes it as ^M and keeps buffering. Ctrl+J sends a real \\n and finishes the line.'},
+  {f: 'ONLCR', field: 'c_oflag', what: 'Output processing (with OPOST). Translates each \\n a program writes into \\r\\n, so the cursor also returns to column 1.',
+    btn: 'Staircase', set: {ONLCR: false}, hint: 'With -onlcr, every \\n moves the cursor down without returning it to column 1. Type a word, press Enter, repeat.'},
+];
+const ft = $('#flagtable');
+for (const x of EXPS) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td class="fl">${x.f}<small>${x.field}</small></td><td>${eh(x.what)}</td><td></td>`;
+  const b = document.createElement('button'); b.className = 'btn'; b.textContent = x.btn + ' ↑';
+  b.addEventListener('click', () => runExp(x));
+  tr.lastElementChild.appendChild(b); ft.appendChild(tr);
+}
+function runExp(x) {
+  resetSim(true);
+  feedMain(toBytes('cat\r\n'), true);
+  rlDeprep(); S.fg = 'cat';
+  Object.assign(S.T, x.set);
+  CARDS.proc.nm.textContent = 'cat · pid 4207';
+  const h = $('#hint'); h.innerHTML = `<b>${eh(x.btn)}.</b> ${eh(x.hint)}`; h.hidden = false;
+  logSep(`experiment: ${x.btn}`);
+  logLine('bash', 'ran cat (fork, setpgid, tcsetpgrp, execve)', 'in');
+  logLine('stty', Object.entries(x.set).map(([k, v]) => (v ? '' : '-') + k.toLowerCase()).join(' '), 'in');
+  syncUI();
+  $('.sim').scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'});
+  screen.focus({preventScroll: true});
+}
+
+/* ---------- encoding explorer ---------- */
+const COMBOS = [
+  ['Tab', {code: 'Tab'}], ['Ctrl+I', {code: 'KeyI', ch: 'i', ctrl: true}], ['Enter', {code: 'Enter'}], ['Ctrl+M', {code: 'KeyM', ch: 'm', ctrl: true}],
+  ['Ctrl+J', {code: 'KeyJ', ch: 'j', ctrl: true}], ['Esc', {code: 'Escape'}], ['Ctrl+[', {code: 'BracketLeft', ch: '[', ctrl: true}],
+  ['Backspace', {code: 'Backspace'}], ['Ctrl+H', {code: 'KeyH', ch: 'h', ctrl: true}], ['Ctrl+Backspace', {code: 'Backspace', ctrl: true}],
+  ['Ctrl+Space', {code: 'Space', ch: ' ', ctrl: true}], ['Ctrl+2', {code: 'Digit2', ch: '2', ctrl: true}],
+  ['Ctrl+C', {code: 'KeyC', ch: 'c', ctrl: true}], ['Alt+b', {code: 'KeyB', ch: 'b', alt: true}],
+  ['↑', {code: 'ArrowUp'}], ['Ctrl+↑', {code: 'ArrowUp', ctrl: true}], ['Shift+Tab', {code: 'Tab', shift: true}], ['é', {code: '', ch: 'é'}],
+];
+function byteBoxes(el, bytes) {
+  el.innerHTML = '';
+  if (!bytes) { el.innerHTML = '<span class="escd">no encoding</span>'; return; }
+  const str = dec.decode(new Uint8Array(bytes));
+  bytes.forEach((b, i) => {
+    let cn = b < 0x20 ? C0N[b] : b === 0x7f ? 'DEL' : b === 0x20 ? 'SP' : b < 0x80 ? String.fromCharCode(b) : 'utf-8';
+    if (b >= 0x80 && i === 0) cn = str[0];
+    const d = document.createElement('div'); d.className = 'by' + (b === 0x1b ? ' esc' : '');
+    d.innerHTML = `<span class="hx">${hex2(b)}</span><span class="cn">${eh(cn)}</span>`;
+    el.appendChild(d);
+  });
+}
+function bitRow(label, v, cleared) {
+  let h = `<div class="bitrow"><span class="bl">${label}</span>`;
+  for (let i = 7; i >= 0; i--) h += `<span class="bit${cleared && cleared.includes(i) && (v >> i & 1) ? ' x' : ''}">${v >> i & 1}</span>`;
+  return h + '</div>';
+}
+function showEnc(k) {
+  const label = keyLabel(k), leg = encodeLegacy(k), kit = encodeKitty(k);
+  $('#e-key').textContent = label;
+  byteBoxes($('#e-leg'), leg); $('#e-legs').textContent = leg ? `"${escBytes(leg)}"` : '';
+  byteBoxes($('#e-kit'), kit); $('#e-kits').textContent = kit ? `"${escBytes(kit)}"` : '';
+  const same = leg ? COMBOS.filter(([l, c]) => l !== label && keyLabel(c) !== label && hexs(encodeLegacy(c) || []) === hexs(leg)).map(([l]) => l) : [];
+  let note = same.length ? `Same bytes as <b>${same.map(eh).join(', ')}</b>. The application cannot tell them apart.` : 'Unique among the keys listed above.';
+  if (leg && leg.length === 2 && leg[0] === 0x1b && k.alt) note = 'Identical to pressing <b>Esc</b> and then the key quickly. Programs separate the two with a timeout.';
+  if (leg && leg[0] === 0x1b && leg.length > 1 && !k.alt) note += ' Starts with ESC, so a lone Esc keypress looks like the start of this sequence until a timeout expires.';
+  $('#e-col').innerHTML = note;
+  const bits = $('#e-bits');
+  if (k.ctrl && k.ch && leg && leg.length === 1 && /^[a-z@\[\\\]^_]$/i.test(k.ch)) {
+    const c = k.ch.toLowerCase().charCodeAt(0) >= 0x61 ? k.ch.toLowerCase().charCodeAt(0) : k.ch.charCodeAt(0);
+    bits.innerHTML = bitRow(`"${String.fromCharCode(c)}" 0x${hex2(c)}`, c, [5, 6, 7]) + bitRow('& 0x1f', 0x1f) + bitRow(`= 0x${hex2(leg[0])} ${C0N[leg[0]]} (${caret(leg[0])})`, leg[0]);
+  } else bits.innerHTML = '';
+}
+const combosEl = $('#combos');
+for (const [l, c] of COMBOS) {
+  const b = document.createElement('button'); b.className = 'key'; b.textContent = l;
+  b.addEventListener('click', () => showEnc(c)); combosEl.appendChild(b);
+}
+const cap = $('#cap');
+cap.addEventListener('keydown', e => { const k = fromEvent(e); if (!k) return; e.preventDefault(); showEnc(k); });
+cap.addEventListener('focus', () => { cap.textContent = 'Listening. Press a key combination.'; });
+cap.addEventListener('blur', () => { cap.textContent = 'Click here and press any key combination'; });
+
+/* ---------- VT stepper ---------- */
+function unesc(s) {
+  return s.replace(/\\(e|E|r|n|t|a|b|"|\\|x([0-9a-fA-F]{2})|0?33|u\{([0-9a-fA-F]+)\})/g, (m, a, hx, u) => {
+    if (hx) return String.fromCharCode(parseInt(hx, 16));
+    if (u) return String.fromCodePoint(parseInt(u, 16));
+    return {e: '\x1b', E: '\x1b', '033': '\x1b', '33': '\x1b', r: '\r', n: '\n', t: '\t', a: '\x07', b: '\b', '"': '"', '\\': '\\'}[a] ?? m;
+  });
+}
+const PRESETS = [
+  ['Colored ls', '\\e[1;34mbin\\e[0m  \\e[1;32mbuild.sh\\e[0m  notes.txt\\r\\n'],
+  ['Readline redraw', '~ $ ls -l\\r\\e[K~ $ make test'],
+  ['Progress bar', '[###      ] 30%\\r[#########] 100%\\r\\n'],
+  ['Window title', '\\e]0;~/code: vim\\a'],
+  ['Cursor addressing', '\\e[2J\\e[3;14H\\e[7m X \\e[0m\\e[1;1Htop left'],
+  ['Staircase (-onlcr)', 'one\\ntwo\\nthree\\n'],
+  ['256 and truecolor', '\\e[38;2;240;160;48mamber\\e[0m \\e[48;5;24m 256 \\e[0m'],
+  ['UTF-8', 'naïve → ✓\\r\\n'],
+];
+const ST = {bytes: [], i: 0, vt: new VT(40, 7), last: null, timer: null, sel: null};
+ST.vt.onTitle = t => {};
+const EDGE = {'GROUND>ESCAPE': 'a', 'ESCAPE>GROUND': 'd', 'ESCAPE>CSI_ENTRY': 'b', 'ESCAPE>OSC_STRING': 'c', 'OSC_STRING>ESCAPE': 'c',
+  'CSI_ENTRY>CSI_PARAM': 'e', 'CSI_ENTRY>CSI_INTERMEDIATE': 'f', 'CSI_ENTRY>GROUND': 'g', 'CSI_PARAM>CSI_INTERMEDIATE': 'h',
+  'CSI_PARAM>GROUND': 'i', 'CSI_INTERMEDIATE>GROUND': 'j', 'OSC_STRING>GROUND': 'k'};
+const vtin = $('#vtin');
+function stLoad(str) { vtin.value = str; ST.bytes = toBytes(unesc(str)); stStop(); stGoto(0); }
+function stGoto(n) {
+  ST.vt.reset(); ST.i = 0; ST.last = null;
+  while (ST.i < n && ST.i < ST.bytes.length) { ST.last = ST.vt.feed(ST.bytes[ST.i]); ST.i++; }
+  stRender();
+}
+function stStep() { if (ST.i >= ST.bytes.length) return false; ST.last = ST.vt.feed(ST.bytes[ST.i]); ST.i++; stRender(); return true; }
+function stStop() { if (ST.timer) { clearInterval(ST.timer); ST.timer = null; } $('#vtplay').textContent = 'Play'; }
+function stRender() {
+  const tape = $('#tape');
+  if (tape.childElementCount !== ST.bytes.length || tape.dataset.src !== vtin.value) {
+    tape.dataset.src = vtin.value; tape.innerHTML = '';
+    ST.bytes.forEach((b, i) => {
+      const d = document.createElement('div'); d.className = 'tb';
+      const cn = b < 0x20 ? C0N[b] : b === 0x20 ? 'SP' : b === 0x7f ? 'DEL' : b < 0x80 ? String.fromCharCode(b) : '·';
+      d.innerHTML = `<div class="hx">${hex2(b)}</div><div class="cn">${eh(cn)}</div>`;
+      d.title = `byte ${i + 1}: click to run up to here`;
+      d.addEventListener('click', () => { stStop(); stGoto(i + 1); });
+      tape.appendChild(d);
+    });
+  }
+  [...tape.children].forEach((d, i) => { d.classList.toggle('done', i < ST.i - 1); d.classList.toggle('cur', i === ST.i - 1); });
+  const cur = tape.children[ST.i - 1];
+  if (cur) tape.scrollLeft = Math.max(0, cur.offsetLeft - tape.clientWidth / 2);
+  document.querySelectorAll('#fsm .node').forEach(n => n.classList.toggle('on', n.id === 'n-' + ST.vt.st));
+  document.querySelectorAll('#fsm .edge').forEach(e => e.classList.remove('on'));
+  const L = ST.last;
+  if (L && L.from !== L.to) { const id = EDGE[L.from + '>' + L.to]; if (id) $('#e-' + id).classList.add('on'); }
+  const info = $('#stepinfo');
+  if (!L) info.innerHTML = `<span class="lbl">ready</span><span>${ST.bytes.length} bytes loaded. Step through them one at a time, or click a byte on the tape.</span>`;
+  else {
+    const name = L.b < 0x20 ? C0N[L.b] : L.b === 0x7f ? 'DEL' : L.b < 0x80 ? `"${String.fromCharCode(L.b)}"` : 'UTF-8 byte';
+    info.innerHTML = `<span class="lbl">byte ${ST.i} of ${ST.bytes.length} · 0x${hex2(L.b)} ${eh(name)}</span>
+      <span class="m">${L.from}${L.from !== L.to ? ' → ' + L.to : ' (stays)'}</span>
+      <span class="act">${L.act}</span><span>${eh(L.desc)}</span>`;
+  }
+  const v = ST.vt;
+  $('#bufs').innerHTML = `params <b>"${eh(v.p)}"</b> · private <b>"${eh(v.pv)}"</b> · intermediates <b>"${eh(v.it)}"</b>${v.st === 'OSC_STRING' ? ` · osc <b>"${eh(v.osc)}"</b>` : ''} · cursor <b>row ${v.y + 1}, col ${v.cx() + 1}</b>`;
+  $('#minititle').textContent = 'window title: ' + (v.title || '(none)');
+  let h = '';
+  for (let y = 0; y < v.rows; y++) {
+    for (let x = 0; x < v.cols; x++) {
+      const c = v.grid[y][x], isCur = v.curVis && y === v.y && x === v.cx();
+      const sel = ST.sel && ST.sel[0] === x && ST.sel[1] === y;
+      h += `<span class="c${isCur ? ' cur' : ''}${sel ? ' sel' : ''}" data-x="${x}" data-y="${y}" style="${cssA(c.a)}">${eh(c.c)}</span>`;
+    }
+    if (y < v.rows - 1) h += '\n';
+  }
+  $('#minigrid').innerHTML = h;
+  if (ST.sel) inspect(ST.sel[0], ST.sel[1]);
+}
+function inspect(x, y) {
+  const c = ST.vt.grid[y][x], a = c.a;
+  const cd = c.c.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+  const cname = v => v == null ? 'default' : typeof v === 'number' ? (v < 8 ? CN[v] : v < 16 ? 'bright ' + CN[v - 8] : '#' + v) : v;
+  const fl = ['b:bold', 'd:dim', 'i:italic', 'u:underline', 'v:inverse'].filter(s => a[s[0]]).map(s => s.slice(2));
+  $('#inspect').innerHTML = `cell (${y + 1}, ${x + 1}) · <b>{ ch: "${eh(c.c)}" U+${cd}, fg: ${eh(cname(a.fg))}, bg: ${eh(cname(a.bg))}${fl.length ? ', ' + fl.join(', ') : ''} }</b>`;
+}
+$('#minigrid').addEventListener('mouseover', e => { const t = e.target.closest('.c'); if (t) inspect(+t.dataset.x, +t.dataset.y); });
+$('#minigrid').addEventListener('click', e => { const t = e.target.closest('.c'); if (t) { ST.sel = [+t.dataset.x, +t.dataset.y]; stRender(); } });
+for (const [l, s] of PRESETS) {
+  const b = document.createElement('button'); b.className = 'btn'; b.textContent = l;
+  b.addEventListener('click', () => stLoad(s)); $('#vtpresets').appendChild(b);
+}
+$('#vtload').addEventListener('click', () => stLoad(vtin.value));
+vtin.addEventListener('keydown', e => { if (e.key === 'Enter') stLoad(vtin.value); });
+$('#vtfromsim').addEventListener('click', () => { if (S.lastOut.length) stLoad(escBytes(S.lastOut)); });
+$('#vtreset').addEventListener('click', () => { stStop(); stGoto(0); });
+$('#vtback').addEventListener('click', () => { stStop(); stGoto(Math.max(0, ST.i - 1)); });
+$('#vtstep').addEventListener('click', () => { stStop(); stStep(); });
+$('#vtend').addEventListener('click', () => { stStop(); stGoto(ST.bytes.length); });
+$('#vtplay').addEventListener('click', () => {
+  if (ST.timer) return stStop();
+  if (ST.i >= ST.bytes.length) stGoto(0);
+  $('#vtplay').textContent = 'Pause';
+  ST.timer = setInterval(() => { if (!stStep()) stStop(); }, 380);
+});
+
+/* ---------- signals ---------- */
+const SG = {};
+function sgReset() {
+  Object.assign(SG, {job: 'run', bash: true, fg: 4200, big: false, busy: false});
+  $('#narr').innerHTML = '<div class="hd">bash ran: sleep 100 | grep x</div><div class="out">bash forked two children, put both in a new process group 4200, and made 4200 the terminal\'s foreground group with tcsetpgrp(). It is now blocked in waitpid().</div>';
+  sgSync();
+}
+function sgSync() {
+  $('#s-fg').textContent = SG.bash ? SG.fg : '(none)';
+  $('#s-size').textContent = SG.big ? '120×36' : '80×24';
+  $('#g-job').classList.toggle('fg', SG.bash && SG.fg === 4200);
+  $('#g-shell').classList.toggle('fg', SG.bash && SG.fg === 4120);
+  const jst = SG.job === 'run' ? 'running' : SG.job === 'stopped' ? 'stopped (T)' : 'terminated';
+  for (const id of ['p-sleep', 'p-grep']) {
+    const p = $('#' + id); p.classList.toggle('stopped', SG.job === 'stopped'); p.classList.toggle('dead', SG.job === 'dead');
+    p.querySelector('.st').textContent = jst;
+  }
+  const pb = $('#p-bash'); pb.classList.toggle('dead', !SG.bash);
+  pb.querySelector('.st').textContent = !SG.bash ? 'exited' : SG.fg === 4120 ? 'foreground · readline reading input' : 'blocked in waitpid()';
+  const dis = SG.busy || !SG.bash;
+  $('#sg-c').disabled = dis; $('#sg-z').disabled = dis; $('#sg-rs').disabled = dis; $('#sg-cl').disabled = dis;
+  $('#sg-fg').disabled = dis || SG.job !== 'stopped';
+  $('#sg-reset').disabled = SG.busy;
+}
+function narr(text, kind) {
+  const d = document.createElement('div'); d.className = kind; d.textContent = text;
+  const n = $('#narr'); n.appendChild(d); n.scrollTop = n.scrollHeight;
+}
+async function sgPlay(title, steps) {
+  SG.busy = true; sgSync();
+  const hd = document.createElement('div'); hd.className = 'hd'; hd.textContent = title; $('#narr').appendChild(hd);
+  for (const s of steps) {
+    if (s.fn) s.fn();
+    for (const id of [].concat(s.el || [])) hit($('#' + id), s.kind);
+    narr(s.text, s.kind); sgSync();
+    await wait(reduce ? 0 : 750);
+  }
+  SG.busy = false; sgSync();
+}
+$('#sg-c').addEventListener('click', () => {
+  const steps = [{el: 's-term', kind: 'in', text: 'The emulator writes 0x03 to the master.'},
+    {el: 's-tty', kind: 'sig', text: `The line discipline has ISIG set and 0x03 matches VINTR, so it calls kill(-${SG.fg}, SIGINT) on the foreground group. The byte itself is discarded.`}];
+  if (SG.fg === 4200 && SG.job === 'run') {
+    steps.push({el: ['p-sleep', 'p-grep'], kind: 'sig', text: 'Every process in group 4200 gets SIGINT. sleep and grep take the default action and terminate.', fn: () => { SG.job = 'dead'; }});
+    steps.push({el: 'p-bash', kind: 'out', text: 'bash returns from waitpid() with both children killed by SIGINT. It calls tcsetpgrp(tty, 4120) to take the foreground back and prints a new prompt.', fn: () => { SG.fg = 4120; }});
+  } else if (SG.fg === 4200) {
+    steps.push({el: ['p-sleep', 'p-grep'], kind: 'sig', text: 'The job is stopped. SIGINT stays pending until it is continued.'});
+  } else {
+    steps.push({el: 'p-bash', kind: 'sig', text: 'bash is the foreground group now, so bash gets the SIGINT. Its handler discards the current input line. bash keeps running.'});
+  }
+  sgPlay('Ctrl+C', steps);
+});
+$('#sg-z').addEventListener('click', () => {
+  const steps = [{el: 's-term', kind: 'in', text: 'The emulator writes 0x1a to the master.'},
+    {el: 's-tty', kind: 'sig', text: `0x1a matches VSUSP. The line discipline sends SIGTSTP to group ${SG.fg}.`}];
+  if (SG.fg === 4200 && SG.job === 'run') {
+    steps.push({el: ['p-sleep', 'p-grep'], kind: 'sig', text: 'sleep and grep stop. They stay in memory with their state intact.', fn: () => { SG.job = 'stopped'; }});
+    steps.push({el: 'p-bash', kind: 'out', text: 'bash used waitpid() with WUNTRACED, so it learns the job stopped. It calls tcsetpgrp(tty, 4120) and prints "[1]+ Stopped".', fn: () => { SG.fg = 4120; }});
+  } else steps.push({el: 'p-bash', kind: 'sig', text: 'An interactive bash ignores SIGTSTP. If Ctrl+Z could stop the shell, nothing would be left to resume your jobs.'});
+  sgPlay('Ctrl+Z', steps);
+});
+$('#sg-fg').addEventListener('click', () => sgPlay('fg', [
+  {el: 'p-bash', kind: 'out', text: 'bash calls tcsetpgrp(tty, 4200) so the job owns the terminal again.', fn: () => { SG.fg = 4200; }},
+  {el: 's-tty', kind: 'out', text: 'The terminal\'s foreground group is now 4200. Ctrl+C and Ctrl+Z will go there.'},
+  {el: ['p-sleep', 'p-grep'], kind: 'sig', text: 'bash sends kill(-4200, SIGCONT). Both processes resume.', fn: () => { SG.job = 'run'; }},
+]));
+$('#sg-rs').addEventListener('click', () => {
+  const who = SG.fg === 4200 && SG.job !== 'dead' ? 'job' : 'bash';
+  sgPlay('Resize window', [
+    {el: 's-term', kind: 'in', text: `The emulator computes a new grid size and calls ioctl(master, TIOCSWINSZ, {rows: ${SG.big ? 24 : 36}, cols: ${SG.big ? 80 : 120}}).`, fn: () => { SG.big = !SG.big; }},
+    {el: 's-tty', kind: 'sig', text: `The kernel stores the new winsize and sends SIGWINCH to foreground group ${SG.fg}.`},
+    who === 'job'
+      ? {el: ['p-sleep', 'p-grep'], kind: 'sig', text: 'sleep and grep ignore SIGWINCH, which is its default action. A full-screen program like vim would call ioctl(TIOCGWINSZ) and redraw.'}
+      : {el: 'p-bash', kind: 'sig', text: 'readline\'s handler calls ioctl(0, TIOCGWINSZ), updates $COLUMNS and $LINES, and redraws the line.'},
+  ]);
+});
+$('#sg-cl').addEventListener('click', () => {
+  const steps = [{el: 's-term', kind: 'in', text: 'The emulator closes the master fd as its window closes.'},
+    {el: 's-tty', kind: 'sig', text: 'With the master gone the kernel hangs up the terminal and sends SIGHUP and SIGCONT to the session leader, bash (4120). Later reads on the slave return EOF and writes fail with EIO.'}];
+  if (SG.job !== 'dead') steps.push({el: 'p-bash', kind: 'sig', text: 'bash\'s SIGHUP handler resends SIGHUP to every job, with SIGCONT first for stopped jobs so they can act on it.'},
+    {el: ['p-sleep', 'p-grep'], kind: 'sig', text: 'sleep and grep terminate on SIGHUP. nohup works by ignoring this signal.', fn: () => { SG.job = 'dead'; }});
+  steps.push({el: 'p-bash', kind: 'sig', text: 'bash exits. Nothing references /dev/pts/3 any more, so the kernel frees the pair.', fn: () => { SG.bash = false; }});
+  sgPlay('Close window', steps);
+});
+$('#sg-reset').addEventListener('click', sgReset);
+
+/* ---------- init ---------- */
+buildStack();
+resetSim();
+showEnc({code: 'KeyC', ch: 'c', ctrl: true});
+stLoad(PRESETS[0][1]);
+sgReset();
+fitScreen();
+logSep('ready');
+logLine('term', 'click the terminal and type, or use the keys under it', 'out');
+})();
+</script>
+
+</body></html>
