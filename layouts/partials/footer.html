@@ -1,20 +1,54 @@
-<footer>
-  <div style="display:flex">
-    {{- range $index, $key := .Site.Params.Social -}}
-    <a class="soc" href="{{ $key.url }}" rel="me" title="{{ $key.name }}"><i data-feather="{{ $key.icon }}"></i></a>
-    <a class="border"></a>
-    {{- end -}}
-  </div>
-  <div class="footer-info">
-    {{ dateFormat "2006" now }} {{ with .Site.Copyright }} {{ . }} {{ end }}
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span class="footer-copy">{{ now.Format "2006" }} {{ site.Copyright }}</span>
+    <div class="footer-links">
+      {{- range site.Params.social }}
+      <a href="{{ .url }}" rel="me" title="{{ .name }}" aria-label="{{ .name }}">{{ partial "icon.html" .icon }}</a>
+      {{- end }}
+      <a href="{{ "index.xml" | relURL }}" title="RSS feed" aria-label="RSS feed">{{ partial "icon.html" "rss" }}</a>
+    </div>
   </div>
 </footer>
-{{ if not hugo.IsServer }}
-{{ template "_internal/google_analytics.html" . }}
-{{ end }}
-
-{{- if (isset .Site.Params "social") -}}
 <script>
-  feather.replace()
+  (function () {
+    var d = document.documentElement;
+    document.querySelector(".theme-toggle").addEventListener("click", function () {
+      var t = d.getAttribute("data-theme") === "light" ? "dark" : "light";
+      d.setAttribute("data-theme", t);
+      try { localStorage.setItem("theme", t); } catch (e) {}
+    });
+    document.querySelectorAll(".heading-anchor .anchor").forEach(function (a) {
+      a.addEventListener("click", function () {
+        var url = location.href.split("#")[0] + a.getAttribute("href");
+        if (navigator.clipboard) navigator.clipboard.writeText(url).catch(function () {});
+        a.classList.add("copied");
+        setTimeout(function () { a.classList.remove("copied"); }, 1200);
+      });
+    });
+    document.querySelectorAll(".code-copy").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var code = b.closest(".code-panel").querySelector("pre code");
+        if (!code || !navigator.clipboard) return;
+        navigator.clipboard.writeText(code.innerText).then(function () {
+          b.textContent = "copied";
+          setTimeout(function () { b.textContent = "copy"; }, 1200);
+        }).catch(function () {});
+      });
+    });
+    var toc = document.querySelector(".toc-aside");
+    if (toc && "IntersectionObserver" in window) {
+      var links = {};
+      toc.querySelectorAll("a[href^='#']").forEach(function (a) { links[decodeURIComponent(a.getAttribute("href").slice(1))] = a; });
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting && links[e.target.id]) {
+            toc.querySelectorAll("a.active").forEach(function (x) { x.classList.remove("active"); });
+            links[e.target.id].classList.add("active");
+          }
+        });
+      }, { rootMargin: "0px 0px -70% 0px" });
+      document.querySelectorAll(".prose h2[id], .prose h3[id]").forEach(function (h) { io.observe(h); });
+    }
+  })();
 </script>
-{{- end -}}
+{{- if not hugo.IsServer }}{{ template "_internal/google_analytics.html" . }}{{ end }}

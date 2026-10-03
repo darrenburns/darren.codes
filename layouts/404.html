@@ -1,0 +1,11 @@
+{{ define "main" }}
+<div class="wrap">
+  <header class="page-head">
+    <p class="kicker">error 404</p>
+    <h1 class="page-title">Page not found</h1>
+  </header>
+  <div class="prose">
+    <p>That path doesn't exist here. Try the <a href="{{ "/" | relURL }}">homepage</a> or the <a href="{{ "/posts/" | relURL }}">list of posts</a>.</p>
+  </div>
+</div>
+{{ end }}

@@ -1,73 +1,85 @@
 baseURL = '//darren.codes/'
 languageCode = 'en-gb'
 title = 'Darren Burns'
-theme = "archie"
-
 copyright = "© Darren Burns"
 
-# disqusShortname = "yourDisqusShortname"
-
-paginate=8 # articles per page
+[pagination]
+  pagerSize = 8
 
 [params]
-	mode="dark" # color-mode → light,dark,toggle or auto
-	useCDN=true # don't use CDNs for fonts and icons, instead serve them locally.
-	subtitle = "Hey, I'm Darren. I'm a software engineer in Edinburgh, UK. I enjoy working on open-source developer tooling, and occasionally writing about it here."
-	mathjax = false # enable MathJax support
-	katex = false # enable KaTeX support
-	customCSS = ["css/custom.css"] # Add custom CSS file
+  mainSections = ["posts"]
+  role = "Software engineer in Edinburgh, building developer tools for the terminal."
+  subtitle = "Hey, I'm Darren. I'm a software engineer in Edinburgh, UK. I enjoy working on open-source developer tooling, and occasionally writing about it here."
+
+  [[params.social]]
+    name = "GitHub"
+    icon = "github"
+    url = "https://github.com/darrenburns/"
+
+  [[params.social]]
+    name = "X"
+    icon = "x"
+    url = "https://x.com/_darrenburns"
+
+  [[params.social]]
+    name = "Fosstodon"
+    icon = "mastodon"
+    url = "https://fosstodon.org/@darrenburns"
+
+  [[params.projects]]
+    name = "Posting"
+    url = "https://posting.sh"
+    description = "A keyboard-centric HTTP client that lives in your terminal."
+    lang = "python"
+
+  [[params.projects]]
+    name = "Textual"
+    url = "https://textual.textualize.io/"
+    description = "The TUI framework for Python I help build and maintain."
+    lang = "python"
+
+  [[params.projects]]
+    name = "Elia"
+    url = "https://github.com/darrenburns/elia"
+    description = "A snappy terminal UI for chatting with large language models."
+    lang = "python"
+
+  [[params.projects]]
+    name = "Dunk"
+    url = "https://github.com/darrenburns/dunk"
+    description = "Pipe your git diffs into it and get them back beautiful."
+    lang = "python"
 
 [markup]
   [markup.highlight]
     codeFences = true
     codeFencesGuessSyntax = true
-	style = "catppuccin-mocha"
-
-# Social Tags
-
-[[params.social]]
-name = "GitHub"
-icon = "github"
-url = "https://github.com/darrenburns/"
-
-[[params.social]]
-name = "X"
-icon = "twitter"
-url = "https://x.com/_darrenburns"
-
-[[params.social]]
-name = "Fosstodon"
-icon = "message-circle"
-url = "https://fosstodon.org/@darrenburns"
-
-# Main menu Items
+    noClasses = false
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 3
 
 [[menu.main]]
-name = "Home"
-url = "/"
-weight = 1
+  name = "Posts"
+  url = "/posts/"
+  weight = 2
 
 [[menu.main]]
-name = "Posts"
-url = "/posts"
-weight = 2
+  name = "Projects"
+  url = "/projects/"
+  weight = 3
 
 [[menu.main]]
-name = "Projects"
-url = "/projects"
-weight = 3
+  name = "Learning"
+  url = "/learning/"
+  weight = 4
 
 [[menu.main]]
-name = "Learning"
-url = "/learning"
-weight = 4
+  name = "Likes"
+  url = "/likes/"
+  weight = 5
 
 [[menu.main]]
-name = "Likes"
-url = "/likes"
-weight = 5
-
-[[menu.main]]
-name = "Tags"
-url = "/tags"
-weight = 6
+  name = "Tags"
+  url = "/tags/"
+  weight = 6

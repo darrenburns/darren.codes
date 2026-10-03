@@ -1,0 +1,10 @@
+<li class="row">
+  <a class="row-link" href="{{ .RelPermalink }}">
+    <time class="row-date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+    <span class="row-main">
+      <span class="row-title">{{ .Title }}{{ if .Draft }} <span class="draft-label">draft</span>{{ end }}</span>
+      {{- with .Description }}<span class="row-desc">{{ . }}</span>{{ end }}
+    </span>
+    <span class="row-tags">{{ with .Params.tags }}{{ delimit (first 2 .) " · " }}{{ end }}</span>
+  </a>
+</li>

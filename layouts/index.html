@@ -1,31 +1,53 @@
-<!DOCTYPE html>
-<html>
-	{{ partial "header.html" . }}
-	<body>
-		<div class="content">
-			{{ partial "head.html" . }}
-			
-			<main class="list">
-				<div class="site-description">
-					{{- if isset .Site.Params "subtitle" -}}
-					<p>{{ .Site.Params.Subtitle | .Page.RenderString }}</p>
-					{{- end -}}
-				</div>
-				{{ $pages := where .Site.RegularPages "Type" "in" .Site.Params.mainSections }}
-				{{ $paginator := .Paginate (where $pages "Params.hidden" "ne" true) }}
-				{{ range $paginator.Pages }}
-				<section class="list-item">
-					<h1 class="title"><a href="{{ .RelPermalink }}">{{.Title}}</a></h1>
-					<time>{{ dateFormat ":date_medium" .Date }}{{ if .Draft }} <span class="draft-label">DRAFT</span> {{ end }}</time>
-					<br>{{ template "partials/pagedescription.html" . }}
-					<a class="readmore" href="{{ .RelPermalink }}">Read more ⟶</a>
-				</section>
-				<hr class="list-item-separator" />
-				{{ end }}
-				{{ template "partials/paginator.html" . }}
-			</main>
-			{{ partial "footer.html" . }}
-		</div>
-		
-	</body>
-</html>
+{{ define "mainclass" }}home{{ end }}
+{{ define "main" }}
+<div class="wrap">
+  <section class="hero">
+    <h1 class="hero-name">Darren Burns</h1>
+    <p class="hero-role">{{ site.Params.role }}</p>
+    <p class="hero-bio">I work on open-source developer tooling, mostly in Python and mostly for the terminal. I help build <a href="https://textual.textualize.io/">Textual</a>, made <a href="https://posting.sh">Posting</a>, and occasionally write about what I learn along the way.</p>
+    <ul class="hero-links">
+      {{- range site.Params.social }}
+      <li><a href="{{ .url }}" rel="me">{{ partial "icon.html" .icon }}<span>{{ .name }}</span></a></li>
+      {{- end }}
+      <li><a href="{{ "index.xml" | relURL }}">{{ partial "icon.html" "rss" }}<span>RSS</span></a></li>
+    </ul>
+  </section>
+
+  {{- $pages := where (where site.RegularPages "Section" "in" site.Params.mainSections) "Params.hidden" "ne" true }}
+  <section class="block" aria-labelledby="writing-label">
+    <h2 class="label" id="writing-label"><span>Writing</span><span class="label-count">{{ len $pages }}</span></h2>
+    <ul class="rows">
+      {{- range first 10 $pages }}
+      {{ partial "post-row.html" . }}
+      {{- end }}
+    </ul>
+    {{- if gt (len $pages) 10 }}
+    <p class="more"><a href="{{ "/posts/" | relURL }}">All posts →</a></p>
+    {{- end }}
+  </section>
+
+  <section class="block" aria-labelledby="projects-label">
+    <h2 class="label" id="projects-label"><span>Projects</span><a class="label-link" href="{{ "/projects/" | relURL }}">all projects →</a></h2>
+    <ul class="panels">
+      {{- range site.Params.projects }}
+      <li>
+        <a class="panel" href="{{ .url }}">
+          <span class="panel-title">{{ .name }}{{ partial "icon.html" "arrow" }}</span>
+          <span class="panel-desc">{{ .description }}</span>
+          <span class="panel-meta">{{ replaceRE "^https?://(www\\.)?" "" .url | strings.TrimSuffix "/" }}</span>
+        </a>
+      </li>
+      {{- end }}
+    </ul>
+  </section>
+
+  <section class="block" aria-labelledby="learning-label">
+    <h2 class="label" id="learning-label"><span>Learning</span></h2>
+    <a class="feature" href="{{ "/learning/how-terminals-work/" | relURL }}">
+      <span class="feature-kicker">interactive explainer</span>
+      <span class="feature-title">Anatomy of a keystroke</span>
+      <span class="feature-desc">Follow a single key press from the keyboard, through the terminal emulator and the kernel's PTY, to your shell and back again as pixels.</span>
+    </a>
+  </section>
+</div>
+{{ end }}

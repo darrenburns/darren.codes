@@ -1,53 +1,59 @@
 {{ define "main" }}
-<main>
-	<article>
-		<div class="title">
-			<h1 class="post-title">{{ .Title }}</h1>
-			<div class="meta">
-				{{ if not .Date.IsZero }}
-					Posted on {{ dateFormat ":date_medium" .Date }}
-				{{ end }}
-				{{ if .Draft }} <span class="draft-label">DRAFT</span> {{ end }}
-			</div>
-		</div>
-		{{ if isset .Params "tldr" }}
-		<div class="tldr">
-			<strong>tl;dr:</strong>
-			{{ .Params.tldr }}
-		</div>{{ end }}
+{{- $isPost := eq .Section "posts" }}
+{{- $toc := .TableOfContents }}
+{{- $hasToc := ge (len (findRE "<li>" $toc)) 3 }}
+<div class="wrap article-grid{{ if $hasToc }} has-toc{{ end }}">
+  <article class="article">
+    <header class="article-head">
+      {{- if $isPost }}
+      <p class="kicker"><a href="{{ "/posts/" | relURL }}">writing</a> / {{ .File.ContentBaseName | default .Slug }}</p>
+      {{- end }}
+      <h1 class="article-title">{{ .Title }}</h1>
+      {{- if $isPost }}
+      <p class="meta">
+        {{- if not .Date.IsZero }}<time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "Jan 2, 2006" }}</time>{{ end }}
+        <span class="sep">·</span><span>{{ .ReadingTime }} min read</span>
+        {{- with .Params.tags }}
+        <span class="sep">·</span>
+        {{- range $i, $t := . }}<a class="tag" href="{{ "/tags/" | relURL }}{{ $t | urlize }}/">#{{ $t }}</a>{{ end }}
+        {{- end }}
+        {{- if .Draft }}<span class="draft-label">draft</span>{{ end }}
+      </p>
+      {{- end }}
+    </header>
 
-		{{ if isset .Params "toc" }}
-		<div class="toc">
-		<strong>Table of contents:</strong>
-		{{ .TableOfContents }}
-		</div>{{ end }}
+    {{- with .Params.tldr }}
+    <aside class="tldr"><span class="tldr-label">tl;dr</span><div>{{ . | markdownify }}</div></aside>
+    {{- end }}
 
-		<section class="body">
-			{{ .Content }}
-		</section>
+    {{- if or $hasToc .Params.toc }}
+    <details class="toc-inline"{{ if .Params.toc }} open{{ end }}>
+      <summary>Contents</summary>
+      {{ $toc }}
+    </details>
+    {{- end }}
 
-		<div class="post-tags">
-			{{ if ne .Type "page" }}
-			{{ if gt .Params.tags 0 }}
-			<nav class="nav tags">
-				<ul class="tags">
-					{{ range .Params.tags }}
-					<li><a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}">{{ . }}</a></li>
-					{{ end }}
-				</ul>
-			</nav>
-			{{ end }}
-			{{ end }}
-		</div>
-		{{- $.Scratch.Set "isDisqus" true -}}
-		<!-- Check if disqus short name is given -->
-		{{ if not .Site.Config.Services.Disqus.Shortname }}
-		{{- $.Scratch.Set "isDisqus" false -}}
-		{{ end }}
+    <div class="prose">
+      {{ .Content }}
+    </div>
 
-		{{- if eq ($.Scratch.Get "isDisqus") true -}}
-		{{- partial "disqus.html" . -}}
-		{{- end -}}
-	</article>
-</main>
+    {{- if $isPost }}
+    <nav class="pager" aria-label="More posts">
+      {{- with .NextInSection }}
+      <a class="pager-link prev" href="{{ .RelPermalink }}"><span class="pager-dir">← newer</span><span class="pager-title">{{ .Title }}</span></a>
+      {{- else }}<span></span>{{ end }}
+      {{- with .PrevInSection }}
+      <a class="pager-link next" href="{{ .RelPermalink }}"><span class="pager-dir">older →</span><span class="pager-title">{{ .Title }}</span></a>
+      {{- end }}
+    </nav>
+    {{- end }}
+  </article>
+
+  {{- if $hasToc }}
+  <aside class="toc-aside" aria-label="On this page">
+    <p class="toc-label">On this page</p>
+    {{ $toc }}
+  </aside>
+  {{- end }}
+</div>
 {{ end }}

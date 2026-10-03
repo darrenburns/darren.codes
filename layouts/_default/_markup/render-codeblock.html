@@ -1,0 +1,9 @@
+{{- $lang := .Type | default "text" -}}
+{{- $label := .Attributes.title | default $lang -}}
+<div class="code-panel">
+  <div class="code-bar">
+    <span class="code-label">{{ $label }}</span>
+    <button class="code-copy" type="button">copy</button>
+  </div>
+  {{- transform.Highlight .Inner $lang .Options }}
+</div>

@@ -1,5 +1,4 @@
-<div class="callout">
-	<div class="callout-inner">
-    💡 {{ .Inner | markdownify }}
-  </div>
-</div>
+<aside class="callout">
+  <span class="callout-icon">{{ partial "icon.html" "info" }}</span>
+  <div class="callout-body">{{ .Inner | markdownify }}</div>
+</aside>
