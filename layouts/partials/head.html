@@ -20,6 +20,7 @@
   <title>{{ .Title }} · {{ site.Title }}</title>
   {{- end }}
   <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ if .IsPage }}{{ .Summary | plainify | truncate 160 }}{{ else }}{{ site.Params.subtitle }}{{ end }}{{ end }}">
+  <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
   <meta name="theme-color" content="#0b0e16" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
   {{ with .OutputFormats.Get "rss" -}}

@@ -4,26 +4,22 @@
   <section class="hero">
     <h1 class="hero-name">Darren Burns</h1>
     <p class="hero-role">{{ site.Params.role }}</p>
-    <p class="hero-bio">I work on open-source developer tooling, mostly in Python and mostly for the terminal. I help build <a href="https://textual.textualize.io/">Textual</a>, made <a href="https://posting.sh">Posting</a>, and occasionally write about what I learn along the way.</p>
+    <p class="hero-bio">I enjoy working on open-source developer tooling, mostly in Python and mostly for the terminal. I made <a href="https://posting.sh">Posting</a>, spent three years working full-time on <a href="https://textual.textualize.io/">Textual</a>, and occasionally write about what I learn along the way.</p>
     <ul class="hero-links">
       {{- range site.Params.social }}
       <li><a href="{{ .url }}" rel="me">{{ partial "icon.html" .icon }}<span>{{ .name }}</span></a></li>
       {{- end }}
-      <li><a href="{{ "index.xml" | relURL }}">{{ partial "icon.html" "rss" }}<span>RSS</span></a></li>
     </ul>
   </section>
 
   {{- $pages := where (where site.RegularPages "Section" "in" site.Params.mainSections) "Params.hidden" "ne" true }}
   <section class="block" aria-labelledby="writing-label">
-    <h2 class="label" id="writing-label"><span>Writing</span><span class="label-count">{{ len $pages }}</span></h2>
+    <h2 class="label" id="writing-label"><span>Writing</span><span class="label-links"><a class="label-link" href="{{ "index.xml" | relURL }}">rss</a><a class="label-link" href="{{ "/posts/" | relURL }}">all posts →</a></span></h2>
     <ul class="rows">
       {{- range first 10 $pages }}
       {{ partial "post-row.html" . }}
       {{- end }}
     </ul>
-    {{- if gt (len $pages) 10 }}
-    <p class="more"><a href="{{ "/posts/" | relURL }}">All posts →</a></p>
-    {{- end }}
   </section>
 
   <section class="block" aria-labelledby="projects-label">

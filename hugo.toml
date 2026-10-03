@@ -35,7 +35,7 @@ copyright = "© Darren Burns"
   [[params.projects]]
     name = "Textual"
     url = "https://textual.textualize.io/"
-    description = "The TUI framework for Python I help build and maintain."
+    description = "The Python framework for building terminal apps. I worked on it full-time for three years."
     lang = "python"
 
   [[params.projects]]

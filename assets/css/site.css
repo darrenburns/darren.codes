@@ -112,7 +112,6 @@ main { flex: 1; }
 }
 
 .header-inner {
-  max-width: 63rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -201,8 +200,9 @@ main { flex: 1; }
   background: var(--border);
   order: 1;
 }
-.label-count, .label-link { order: 2; }
+.label-count, .label-link, .label-links { order: 2; }
 .label-count { color: var(--faint); }
+.label-links { display: flex; gap: 1rem; }
 .label-link {
   text-transform: none;
   letter-spacing: 0;
@@ -247,12 +247,13 @@ main { flex: 1; }
 .hero-role {
   font-family: var(--font-mono);
   font-size: .875rem;
-  color: var(--accent);
+  color: var(--muted);
   margin: .875rem 0 1.25rem;
   line-height: 1.5;
 }
 .hero-bio {
   margin: 0;
+  text-wrap: pretty;
   max-width: 36rem;
   color: var(--muted);
   font-size: 1.0625rem;
@@ -476,14 +477,15 @@ main { flex: 1; }
 
 .toc-aside { display: none; }
 
-@media (min-width: 72rem) {
+@media (min-width: 80rem) {
   .article-grid.has-toc {
-    max-width: 72rem;
+    max-width: none;
     display: grid;
-    grid-template-columns: minmax(0, var(--measure)) 14rem;
-    justify-content: center;
-    gap: 4.5rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr);
+    column-gap: 0;
   }
+  .has-toc .article { grid-column: 2; }
+  .has-toc .toc-aside { grid-column: 3; width: 14rem; margin-left: 3.5rem; }
   .has-toc .toc-inline { display: none; }
   .toc-aside {
     display: block;
