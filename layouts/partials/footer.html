@@ -1,6 +1,6 @@
 <footer class="site-footer">
   <div class="wrap footer-inner">
-    <span class="footer-copy">{{ now.Format "2006" }} {{ site.Copyright }}</span>
+    <span class="footer-copy">© {{ now.Format "2006" }} {{ site.Title }}</span>
     <div class="footer-links">
       {{- range site.Params.social }}
       <a href="{{ .url }}" rel="me" title="{{ .name }}" aria-label="{{ .name }}">{{ partial "icon.html" .icon }}</a>

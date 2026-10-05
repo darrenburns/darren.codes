@@ -1,7 +1,7 @@
 {{ define "main" }}
 <div class="wrap">
   <header class="page-head">
-    <p class="kicker">{{ if eq .Kind "term" }}tag{{ else }}index{{ end }}</p>
+    {{ partial "path.html" . }}
     <h1 class="page-title">{{ if eq .Kind "term" }}#{{ .Title | lower }}{{ else if eq .Section "posts" }}Writing{{ else }}{{ .Title }}{{ end }}</h1>
   </header>
   {{- with .Content }}<div class="prose">{{ . }}</div>{{ end }}

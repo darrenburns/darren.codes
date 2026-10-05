@@ -5,9 +5,7 @@
 <div class="wrap article-grid{{ if $hasToc }} has-toc{{ end }}">
   <article class="article">
     <header class="article-head">
-      {{- if $isPost }}
-      <p class="kicker"><a href="{{ "/posts/" | relURL }}">writing</a> / {{ .File.ContentBaseName | default .Slug }}</p>
-      {{- end }}
+      {{ partial "path.html" . }}
       <h1 class="article-title">{{ .Title }}</h1>
       {{- if $isPost }}
       <p class="meta">

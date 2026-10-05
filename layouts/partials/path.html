@@ -1,0 +1,12 @@
+{{- /* Shell-style breadcrumb built from the page URL: ~/posts/some-post */ -}}
+{{- $segments := split (strings.Trim .RelPermalink "/") "/" -}}
+<p class="kicker path"><a class="path-root" href="{{ "/" | relURL }}">~</a>
+{{- range $i, $s := $segments -}}
+<span class="path-sep">/</span>
+{{- if lt (add $i 1) (len $segments) -}}
+<a href="{{ printf "/%s/" (delimit (first (add $i 1) $segments) "/") | relURL }}">{{ $s }}</a>
+{{- else -}}
+<span class="path-here">{{ $s }}</span>
+{{- end -}}
+{{- end -}}
+</p>

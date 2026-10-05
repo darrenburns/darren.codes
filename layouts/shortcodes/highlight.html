@@ -1,0 +1,8 @@
+{{- $lang := .Get 0 | default "text" -}}
+<div class="code-panel">
+  <div class="code-bar">
+    <span class="code-label">{{ $lang }}</span>
+    <button class="code-copy" type="button">copy</button>
+  </div>
+  {{- highlight (trim .InnerDeindent "\n") $lang (.Get 1 | default "") }}
+</div>
