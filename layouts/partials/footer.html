@@ -15,7 +15,11 @@
     document.querySelector(".theme-toggle").addEventListener("click", function () {
       var t = d.getAttribute("data-theme") === "light" ? "dark" : "light";
       d.setAttribute("data-theme", t);
-      try { localStorage.setItem("theme", t); } catch (e) {}
+      var system = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      try {
+        if (t === system) localStorage.removeItem("theme-override");
+        else localStorage.setItem("theme-override", t);
+      } catch (e) {}
     });
     document.querySelectorAll(".heading-anchor .anchor").forEach(function (a) {
       a.addEventListener("click", function () {

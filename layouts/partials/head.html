@@ -3,15 +3,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     (function () {
-      var d = document.documentElement, t = null;
+      var d = document.documentElement, t = null, mq = matchMedia("(prefers-color-scheme: light)");
+      function system() { return mq.matches ? "light" : "dark"; }
+      function stored() {
+        try { var s = localStorage.getItem("theme-override"); return s === "light" || s === "dark" ? s : null; } catch (e) { return null; }
+      }
+      try { localStorage.removeItem("theme"); } catch (e) {}
       try { t = new URLSearchParams(location.search).get("theme"); } catch (e) {}
-      if (t !== "light" && t !== "dark") {
-        try { t = localStorage.getItem("theme"); } catch (e) {}
-      }
-      if (t !== "light" && t !== "dark") {
-        t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-      }
+      var pinned = t === "light" || t === "dark";
+      if (!pinned) t = stored() || system();
       d.setAttribute("data-theme", t);
+      mq.addEventListener("change", function () {
+        if (!pinned && !stored()) d.setAttribute("data-theme", system());
+      });
     })();
   </script>
   {{- if .IsHome }}
