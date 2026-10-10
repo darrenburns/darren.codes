@@ -1,16 +1,7 @@
 {{ define "mainclass" }}home{{ end }}
 {{ define "main" }}
 <div class="wrap">
-  <section class="hero">
-    <h1 class="hero-name">Darren Burns</h1>
-    <p class="hero-role">{{ site.Params.role }}</p>
-    <p class="hero-bio">I'm currently working as an engineer at Monzo. I enjoy working on open-source terminal tools in Golang and Python. I made <a href="https://posting.sh">Posting</a>, spent three years contributing full-time on <a href="https://textual.textualize.io/">Textual</a>, and occasionally write about what I learn along the way.</p>
-    <ul class="hero-links">
-      {{- range site.Params.social }}
-      <li><a href="{{ .url }}" rel="me">{{ partial "icon.html" .icon }}<span>{{ .name }}</span></a></li>
-      {{- end }}
-    </ul>
-  </section>
+  {{- partial "hero.html" . }}
 
   {{- $pages := where (where site.RegularPages "Section" "in" site.Params.mainSections) "Params.hidden" "ne" true }}
   <section class="block" aria-labelledby="writing-label">

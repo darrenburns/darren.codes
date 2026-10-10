@@ -1,0 +1,152 @@
+<section class="hero hx-grid" aria-labelledby="gx-name">
+  <canvas class="gx-canvas" aria-hidden="true"></canvas>
+  <div class="gx-content">
+    <p class="gx-kicker"><span class="gx-dot" aria-hidden="true"></span>edinburgh, uk <span class="gx-sep" aria-hidden="true">/</span> engineer @ monzo</p>
+    <h1 class="gx-name" id="gx-name">Darren Burns<span class="gx-cursor" aria-hidden="true"></span></h1>
+    <p class="gx-role">{{ site.Params.role }}</p>
+    <p class="hero-bio">I'm currently working as an engineer at Monzo. I enjoy working on open-source terminal tools in Golang and Python. I made <a href="https://posting.sh">Posting</a>, spent three years contributing full-time on <a href="https://textual.textualize.io/">Textual</a>, and occasionally write about what I learn along the way.</p>
+    <ul class="hero-links">
+      {{- range site.Params.social }}
+      <li><a href="{{ .url }}" rel="me">{{ partial "icon.html" .icon }}<span>{{ .name }}</span></a></li>
+      {{- end }}
+    </ul>
+  </div>
+  <output class="gx-cpr" aria-hidden="true">ESC[<span id="gx-row">1</span>;<span id="gx-col">1</span>R</output>
+</section>
+<script>
+(function () {
+  // A full-bleed grid of terminal cells. The cursor lights cells as it passes; each picks one glyph and burns
+  // slowly down through RAMP. On the first visit of a session the dot field powers on outward from the
+  // block cursor after the name.
+  var hero = document.querySelector(".hx-grid");
+  var canvas = hero.querySelector(".gx-canvas");
+  var ctx = canvas.getContext("2d");
+  var rowEl = document.getElementById("gx-row"), colEl = document.getElementById("gx-col");
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var RAMP = " .·:-=+*#%▒▓█";
+  var NOISE = "/\\|<>{}[]01#%&$*+=~";
+  var DECAY = 0.975, JITTER = 0.15, RADIUS = 4;
+  var CW, CH, cols, rows, energy, glyph, quiet, dpr, colors, raf = 0, visible = true, lastT = 0;
+  var ptr = { x: 0, y: 0, px: null, py: null, on: false, moved: false };
+  // During power-on, reveal[i] is each dot's opacity (0..1); intro advances it and lights a few cells.
+  var intro = null, reveal = null;
+
+  function readColors() {
+    var s = getComputedStyle(document.documentElement);
+    colors = { faint: s.getPropertyValue("--border-strong").trim(), accent: s.getPropertyValue("--accent").trim(), strong: s.getPropertyValue("--accent-strong").trim() };
+  }
+  function resize() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    var r = canvas.getBoundingClientRect();
+    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+    var fs = 13; ctx.font = fs * dpr + 'px "Geist Mono", ui-monospace, monospace';
+    CW = Math.ceil(ctx.measureText("M").width); CH = Math.ceil(fs * 1.55 * dpr);
+    cols = Math.ceil(canvas.width / CW); rows = Math.ceil(canvas.height / CH);
+    energy = new Float32Array(cols * rows); glyph = new Array(cols * rows).fill("");
+    // Cells behind the copy are drawn dimmer so the text stays legible.
+    quiet = new Uint8Array(cols * rows);
+    hero.querySelectorAll(".gx-content > *").forEach(function (el) {
+      var b = el.getBoundingClientRect(), pad = 6;
+      var c0 = Math.max(0, Math.floor((b.left - r.left - pad) * dpr / CW)), c1 = Math.min(cols - 1, Math.ceil((b.right - r.left + pad) * dpr / CW));
+      var r0 = Math.max(0, Math.floor((b.top - r.top - pad) * dpr / CH)), r1 = Math.min(rows - 1, Math.ceil((b.bottom - r.top + pad) * dpr / CH));
+      for (var y = r0; y <= r1; y++) for (var x = c0; x <= c1; x++) quiet[y * cols + x] = 1;
+    });
+    ctx.textBaseline = "top";
+    if (intro) intro = null, reveal = null;
+    draw();
+  }
+  function light(i, e) {
+    if (e <= energy[i]) return;
+    if (energy[i] < 0.05) glyph[i] = NOISE[(Math.random() * NOISE.length) | 0];
+    energy[i] = e;
+  }
+  function excite(cx, cy) {
+    var c0 = Math.floor(cx / CW), r0 = Math.floor(cy / CH);
+    for (var r = r0 - RADIUS; r <= r0 + RADIUS; r++) for (var c = c0 - RADIUS * 2; c <= c0 + RADIUS * 2; c++) {
+      if (r < 0 || c < 0 || r >= rows || c >= cols) continue;
+      var d = Math.hypot((c - c0) / 2, r - r0);
+      if (d <= RADIUS) light(r * cols + c, (1 - d / RADIUS) * (1 - JITTER * Math.random()));
+    }
+  }
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var live = false;
+    for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++) {
+      var i = r * cols + c, e = energy[i], x = c * CW, y = r * CH, q = quiet[i] ? 0.18 : 1;
+      if (e < 0.02) {
+        if ((c % 2 === 0) && (r % 2 === 0)) { ctx.globalAlpha = 0.55 * q * (reveal ? reveal[i] : 1); ctx.fillStyle = colors.faint; ctx.fillText("·", x, y); }
+        continue;
+      }
+      live = true;
+      var ch = e > 0.55 ? glyph[i] : RAMP[Math.min(RAMP.length - 1, Math.round(e * (RAMP.length - 1)))];
+      ctx.globalAlpha = Math.min(1, 0.25 + e * 0.75) * q;
+      ctx.fillStyle = e > 0.8 ? colors.strong : e > 0.3 ? colors.accent : colors.faint;
+      ctx.fillText(ch, x, y);
+    }
+    ctx.globalAlpha = 1;
+    return live;
+  }
+  function step(t, decay) {
+    if (intro && !intro(t)) intro = null, reveal = null;
+    if (ptr.on && ptr.moved) {
+      // Fill in the path between pointer samples so a fast flick leaves a continuous trail.
+      var fx = ptr.px == null ? ptr.x : ptr.px, fy = ptr.py == null ? ptr.y : ptr.py;
+      var n = Math.max(1, Math.ceil(Math.hypot(ptr.x - fx, ptr.y - fy) / CW));
+      for (var k = 1; k <= n; k++) excite(fx + (ptr.x - fx) * k / n, fy + (ptr.y - fy) * k / n);
+      ptr.px = ptr.x; ptr.py = ptr.y; ptr.moved = false;
+    }
+    for (var i = 0; i < energy.length; i++) energy[i] *= decay;
+  }
+  function frame() {
+    raf = 0;
+    if (!visible || !energy) return;
+    var t = performance.now(), dt = Math.min(100, t - (lastT || t)); lastT = t;
+    step(t, Math.pow(DECAY, dt / 16.7));
+    if (draw() || intro || ptr.on) raf = requestAnimationFrame(frame);
+    else lastT = 0;
+  }
+  function kick() { if (!raf && !reduce) raf = requestAnimationFrame(frame); }
+
+  // Power on: dots fade in outward from the block cursor, like a CRT warming up; a few cells catch and burn down.
+  function powerOn() {
+    var b = hero.querySelector(".gx-cursor").getBoundingClientRect(), cr = canvas.getBoundingClientRect();
+    var oc = (b.left + b.width / 2 - cr.left) * dpr / CW, or = (b.top + b.height / 2 - cr.top) * dpr / CH;
+    var at = new Float32Array(cols * rows), fired = new Uint8Array(cols * rows), end = 0, t0 = performance.now();
+    for (var i = 0; i < at.length; i++) {
+      at[i] = Math.hypot((i % cols - oc) / 2, ((i / cols) | 0) - or) * 22 + Math.random() * 160;
+      end = Math.max(end, at[i] + 300);
+    }
+    reveal = new Float32Array(cols * rows);
+    return function (t) {
+      var el = t - t0;
+      for (var i = 0; i < at.length; i++) {
+        reveal[i] = Math.max(0, Math.min(1, (el - at[i]) / 260));
+        if (!fired[i] && el >= at[i]) { fired[i] = 1; if (Math.random() < 0.025) light(i, 0.5 + Math.random() * 0.25); }
+      }
+      return el < end;
+    };
+  }
+  function firstVisit() {
+    try { if (sessionStorage.getItem("hero-intro")) return false; sessionStorage.setItem("hero-intro", "1"); } catch (e) {}
+    return true;
+  }
+
+  hero.addEventListener("pointermove", function (e) {
+    var r = canvas.getBoundingClientRect();
+    ptr.x = (e.clientX - r.left) * dpr; ptr.y = (e.clientY - r.top) * dpr; ptr.on = true; ptr.moved = true;
+    rowEl.textContent = Math.floor(ptr.y / CH) + 1; colEl.textContent = Math.floor(ptr.x / CW) + 1;
+    if (reduce) { energy.fill(0); excite(ptr.x, ptr.y); draw(); }
+    kick();
+  });
+  hero.addEventListener("pointerleave", function () { ptr.on = false; ptr.px = ptr.py = null; });
+  new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) kick(); }).observe(hero);
+  new MutationObserver(function () { readColors(); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  addEventListener("resize", resize);
+  readColors();
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
+    resize();
+    if (!reduce && firstVisit()) { intro = powerOn(); draw(); }
+    kick();
+  });
+})();
+</script>
